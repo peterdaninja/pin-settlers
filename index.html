@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
@@ -12,270 +11,258 @@
 @import url('https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Share+Tech+Mono&display=swap');
 
 :root {
-–yellow: #f5c842;
-–orange: #e05c2a;
-–green: #4af04a;
-–bg: #0a0a0f;
-–card: #13131e;
-–border: #2a2a4a;
-–dim: #4040a0;
-–text: #e8e0d0;
-–safe-top: env(safe-area-inset-top, 0px);
-–safe-bottom: env(safe-area-inset-bottom, 0px);
+  --yellow: #f5c842;
+  --orange: #e05c2a;
+  --green: #4af04a;
+  --bg: #0a0a0f;
+  --card: #13131e;
+  --border: #2a2a4a;
+  --dim: #4040a0;
+  --text: #e8e0d0;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
 }
 
-- { box-sizing: border-box; -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; }
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; }
 
 body {
-background: var(–bg);
-font-family: ‘Share Tech Mono’, ‘Courier New’, monospace;
-color: var(–text);
-min-height: 100vh;
-overscroll-behavior: none;
+  background: var(--bg);
+  font-family: 'Share Tech Mono', 'Courier New', monospace;
+  color: var(--text);
+  min-height: 100vh;
+  overscroll-behavior: none;
 }
 
 input, select, button, textarea {
-font-family: ‘Share Tech Mono’, ‘Courier New’, monospace;
--webkit-appearance: none;
-appearance: none;
+  font-family: 'Share Tech Mono', 'Courier New', monospace;
+  -webkit-appearance: none;
+  appearance: none;
 }
 
-/* LAYOUT */
 .app { display: flex; flex-direction: column; min-height: 100vh; }
 
 .header {
-text-align: center;
-padding: calc(var(–safe-top) + 20px) 16px 16px;
-background: #0d0d1a;
-border-bottom: 1px solid var(–border);
+  text-align: center;
+  padding: calc(var(--safe-top) + 20px) 16px 16px;
+  background: #0d0d1a;
+  border-bottom: 1px solid var(--border);
 }
 .header-title {
-font-family: ‘Black Ops One’, cursive;
-font-size: 2rem;
-color: var(–yellow);
-text-shadow: 0 0 8px #f5c84280;
-letter-spacing: 0.05em;
+  font-family: 'Black Ops One', cursive;
+  font-size: 2rem;
+  color: var(--yellow);
+  text-shadow: 0 0 8px #f5c84280;
+  letter-spacing: 0.05em;
 }
 .header-sub {
-color: var(–orange);
-font-size: 0.65rem;
-letter-spacing: 0.25em;
-text-transform: uppercase;
-margin-top: 2px;
+  color: var(--orange);
+  font-size: 0.65rem;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  margin-top: 2px;
 }
 
 .tabs {
-display: flex;
-background: #0d0d1a;
-border-bottom: 1px solid var(–border);
-position: sticky;
-top: 0;
-z-index: 50;
+  display: flex;
+  background: #0d0d1a;
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 50;
 }
 .tab {
-flex: 1;
-padding: 10px 4px;
-background: transparent;
-border: none;
-border-bottom: 2px solid transparent;
-color: var(–dim);
-font-size: 0.6rem;
-letter-spacing: 0.12em;
-text-transform: uppercase;
-cursor: pointer;
-display: flex;
-flex-direction: column;
-align-items: center;
-gap: 2px;
+  flex: 1;
+  padding: 10px 4px;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--dim);
+  font-size: 0.6rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
 }
-.tab.active { color: var(–yellow); border-bottom-color: var(–yellow); }
+.tab.active { color: var(--yellow); border-bottom-color: var(--yellow); }
 .tab-icon { font-size: 1.1rem; }
 
 .content {
-flex: 1;
-padding: 20px 16px calc(var(–safe-bottom) + 20px);
-max-width: 520px;
-margin: 0 auto;
-width: 100%;
+  flex: 1;
+  padding: 20px 16px calc(var(--safe-bottom) + 20px);
+  max-width: 520px;
+  margin: 0 auto;
+  width: 100%;
 }
 
-/* TYPOGRAPHY */
 .sec-title {
-font-size: 0.65rem;
-letter-spacing: 0.3em;
-text-transform: uppercase;
-color: var(–yellow);
-text-shadow: 0 0 6px #f5c84250;
-border-bottom: 1px solid #f5c84225;
-padding-bottom: 8px;
-margin-bottom: 16px;
+  font-size: 0.65rem;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--yellow);
+  text-shadow: 0 0 6px #f5c84250;
+  border-bottom: 1px solid #f5c84225;
+  padding-bottom: 8px;
+  margin-bottom: 16px;
 }
 .green-title {
-font-size: 0.65rem;
-letter-spacing: 0.3em;
-text-transform: uppercase;
-color: var(–green);
-text-shadow: 0 0 6px #4af04a50;
-border-bottom: 1px solid #4af04a25;
-padding-bottom: 8px;
-margin-bottom: 14px;
+  font-size: 0.65rem;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--green);
+  text-shadow: 0 0 6px #4af04a50;
+  border-bottom: 1px solid #4af04a25;
+  padding-bottom: 8px;
+  margin-bottom: 14px;
 }
 
-/* INPUTS */
 .field {
-background: var(–card);
-border: 1.5px solid var(–border);
-border-radius: 10px;
-padding: 14px 16px;
-color: var(–text);
-font-size: 1rem;
-outline: none;
-width: 100%;
-transition: border-color 0.2s;
+  background: var(--card);
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  padding: 14px 16px;
+  color: var(--text);
+  font-size: 1rem;
+  outline: none;
+  width: 100%;
+  transition: border-color 0.2s;
 }
-.field:focus { border-color: var(–yellow); }
+.field:focus { border-color: var(--yellow); }
 .field::placeholder { color: #3a3a6a; }
 
 select.field {
-background-image: url(“data:image/svg+xml,%3Csvg xmlns=‘http://www.w3.org/2000/svg’ width=‘12’ height=‘8’ viewBox=‘0 0 12 8’%3E%3Cpath fill=’%23f5c842’ d=‘M6 8L0 0h12z’/%3E%3C/svg%3E”);
-background-repeat: no-repeat;
-background-position: right 14px center;
-padding-right: 36px;
-cursor: pointer;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%23f5c842' d='M6 8L0 0h12z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  padding-right: 36px;
+  cursor: pointer;
 }
 
-/* BUTTONS */
 .btn {
-border-radius: 10px;
-padding: 14px 20px;
-font-size: 0.8rem;
-letter-spacing: 0.15em;
-text-transform: uppercase;
-cursor: pointer;
-border: 1.5px solid var(–yellow);
-color: var(–yellow);
-background: transparent;
-width: 100%;
-transition: background 0.15s;
+  border-radius: 10px;
+  padding: 14px 20px;
+  font-size: 0.8rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  cursor: pointer;
+  border: 1.5px solid var(--yellow);
+  color: var(--yellow);
+  background: transparent;
+  width: 100%;
+  transition: background 0.15s;
 }
 .btn:active { background: #f5c84215; }
 
 .btn-primary {
-background: var(–yellow);
-color: #0a0a0f;
-border-color: var(–yellow);
-font-family: ‘Black Ops One’, cursive;
-font-size: 1rem;
-padding: 16px;
+  background: var(--yellow);
+  color: #0a0a0f;
+  border-color: var(--yellow);
+  font-family: 'Black Ops One', cursive;
+  font-size: 1rem;
+  padding: 16px;
 }
 .btn-primary:active { background: #d4a820; }
 
 .btn-danger {
-border-color: var(–orange);
-color: var(–orange);
-padding: 8px 14px;
-font-size: 0.65rem;
-width: auto;
+  border-color: var(--orange);
+  color: var(--orange);
+  padding: 8px 14px;
+  font-size: 0.65rem;
+  width: auto;
 }
 .btn-danger:active { background: #e05c2a15; }
 
 .btn-ghost {
-border: 2px dashed #2a2a6a;
-color: var(–dim);
-background: transparent;
-padding: 16px;
+  border: 2px dashed #2a2a6a;
+  color: var(--dim);
+  background: transparent;
+  padding: 16px;
 }
-.btn-ghost:active { border-color: var(–yellow); color: var(–yellow); }
+.btn-ghost:active { border-color: var(--yellow); color: var(--yellow); }
 
 .btn-sm {
-width: 44px;
-height: 44px;
-border-radius: 10px;
-border: 1.5px solid var(–orange);
-color: var(–orange);
-background: transparent;
-font-size: 1rem;
-cursor: pointer;
-display: flex;
-align-items: center;
-justify-content: center;
-flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  border: 1.5px solid var(--orange);
+  color: var(--orange);
+  background: transparent;
+  font-size: 1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
 }
 
 .btn-subtle {
-border-color: #2a2a5a;
-color: #5050a0;
-background: transparent;
-padding: 12px;
-font-size: 0.7rem;
+  border-color: #2a2a5a;
+  color: #5050a0;
+  background: transparent;
+  padding: 12px;
+  font-size: 0.7rem;
 }
 
-/* CARDS */
 .card {
-background: var(–card);
-border: 1px solid var(–border);
-border-radius: 12px;
-margin-bottom: 14px;
-overflow: hidden;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  margin-bottom: 14px;
+  overflow: hidden;
 }
 .card-head {
-display: flex;
-justify-content: space-between;
-align-items: center;
-padding: 14px 16px;
-border-bottom: 1px solid #1a1a3a;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 16px;
+  border-bottom: 1px solid #1a1a3a;
 }
 .card-label {
-color: var(–orange);
-font-size: 0.7rem;
-letter-spacing: 0.2em;
-text-transform: uppercase;
-text-shadow: 0 0 6px #e05c2a50;
+  color: var(--orange);
+  font-size: 0.7rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  text-shadow: 0 0 6px #e05c2a50;
 }
 .card-body { padding: 14px 16px; }
 .card-hint { padding: 0 16px 12px; font-size: 0.62rem; color: #3a3a7a; letter-spacing: 0.05em; }
 
-/* PLAYER ROW */
 .player-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
 
-/* ASSIGN ROW */
 .assign-row { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
 .assign-name { color: #a0a0d0; font-size: 0.9rem; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
-/* BALANCE ROW */
 .bal-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #1a2a1a; font-size: 0.95rem; }
-.pos { color: var(–green); text-shadow: 0 0 6px #4af04a50; font-weight: 700; }
-.neg { color: var(–orange); text-shadow: 0 0 6px #e05c2a50; font-weight: 700; }
+.pos { color: var(--green); text-shadow: 0 0 6px #4af04a50; font-weight: 700; }
+.neg { color: var(--orange); text-shadow: 0 0 6px #e05c2a50; font-weight: 700; }
 
-/* TX CARD */
 .tx-card { background: #0d0d1a; border: 1px solid #1a3a1a; border-radius: 10px; padding: 14px 16px; margin-bottom: 10px; display: flex; align-items: center; gap: 10px; font-size: 0.95rem; }
-.tx-from { color: var(–orange); }
-.tx-arrow { color: var(–green); font-size: 1.2rem; }
-.tx-to { color: var(–green); }
-.tx-amt { margin-left: auto; color: var(–green); font-family: ‘Black Ops One’, cursive; font-size: 1.1rem; text-shadow: 0 0 6px #4af04a50; }
+.tx-from { color: var(--orange); }
+.tx-arrow { color: var(--green); font-size: 1.2rem; }
+.tx-to { color: var(--green); }
+.tx-amt { margin-left: auto; color: var(--green); font-family: 'Black Ops One', cursive; font-size: 1.1rem; text-shadow: 0 0 6px #4af04a50; }
 
-/* HISTORY */
-.hist-card { background: var(–card); border: 1px solid var(–border); border-radius: 12px; margin-bottom: 12px; overflow: hidden; cursor: pointer; }
+.hist-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; margin-bottom: 12px; overflow: hidden; cursor: pointer; }
 .hist-head { display: flex; justify-content: space-between; align-items: center; padding: 14px 16px; }
-.hist-date { color: var(–yellow); font-size: 0.85rem; }
-.hist-meta { color: var(–dim); font-size: 0.65rem; margin-top: 3px; letter-spacing: 0.05em; }
+.hist-date { color: var(--yellow); font-size: 0.85rem; }
+.hist-meta { color: var(--dim); font-size: 0.65rem; margin-top: 3px; letter-spacing: 0.05em; }
 .hist-right { display: flex; align-items: center; gap: 10px; }
-.hist-chevron { color: var(–dim); font-size: 0.8rem; transition: transform 0.2s; }
+.hist-chevron { color: var(--dim); font-size: 0.8rem; transition: transform 0.2s; }
 .hist-chevron.open { transform: rotate(90deg); }
 .hist-body { border-top: 1px solid #1a1a3a; padding: 14px 16px; }
 
-/* EMPTY / MISC */
 .empty { text-align: center; color: #3a3a7a; padding: 40px 16px; font-size: 0.85rem; line-height: 2; }
-.all-clear { text-align: center; color: var(–green); text-shadow: 0 0 8px #4af04a50; font-size: 1.1rem; padding: 20px; }
+.all-clear { text-align: center; color: var(--green); text-shadow: 0 0 8px #4af04a50; font-size: 1.1rem; padding: 20px; }
 .gap { margin-bottom: 12px; }
 .gap-lg { margin-bottom: 20px; }
-.error { color: var(–orange); font-size: 0.78rem; margin-top: 10px; text-align: center; }
+.error { color: var(--orange); font-size: 0.78rem; margin-top: 10px; text-align: center; }
 
 .rename-row { display: flex; gap: 8px; margin-bottom: 14px; }
 .rename-row .field { font-size: 0.85rem; padding: 10px 14px; }
-.rename-btn { background: transparent; border: 1.5px solid var(–yellow); color: var(–yellow); border-radius: 10px; padding: 10px 14px; font-size: 0.65rem; letter-spacing: 0.1em; cursor: pointer; white-space: nowrap; }
+.rename-btn { background: transparent; border: 1.5px solid var(--yellow); color: var(--yellow); border-radius: 10px; padding: 10px 14px; font-size: 0.65rem; letter-spacing: 0.1em; cursor: pointer; white-space: nowrap; }
 </style>
-
 </head>
 <body>
 <div class="app" id="app">
@@ -289,13 +276,12 @@ text-shadow: 0 0 6px #e05c2a50;
 </div>
 
 <script>
-// ─── STATE ────────────────────────────────────────────────────────────────────
 const COST = 5;
 const RANKS = ['1st 🥇','2nd 🥈','3rd 🥉','4th'];
 
 let state = {
-  tab: 'session',        // session | history
-  sessionTab: 'setup',   // setup | games | results
+  tab: 'session',
+  sessionTab: 'setup',
   players: ['','',''],
   games: [],
   result: null,
@@ -303,6 +289,9 @@ let state = {
   error: '',
   expandedHist: null,
 };
+
+// Debounce timers for player name inputs — prevents re-render killing focus
+const inputTimers = {};
 
 function loadHistory() {
   try { return JSON.parse(localStorage.getItem('pinSettlers_history') || '[]'); }
@@ -312,7 +301,6 @@ function saveHistory(h) {
   localStorage.setItem('pinSettlers_history', JSON.stringify(h));
 }
 
-// ─── LOGIC ────────────────────────────────────────────────────────────────────
 function computeBalances(players, games) {
   const bal = {};
   players.forEach(p => bal[p] = 0);
@@ -356,12 +344,8 @@ function formatDate(iso) {
   const d = new Date(iso);
   return d.toLocaleDateString('en-US', {weekday:'short', month:'short', day:'numeric', year:'numeric'});
 }
+function todayISO() { return new Date().toISOString().split('T')[0]; }
 
-function todayISO() {
-  return new Date().toISOString().split('T')[0];
-}
-
-// ─── RENDER ───────────────────────────────────────────────────────────────────
 function render() {
   renderTabs();
   renderContent();
@@ -414,8 +398,9 @@ function renderSession() {
 function renderSetup() {
   const rows = state.players.map((p,i) => `
     <div class="player-row">
-      <input class="field" placeholder="Player ${i+1}" value="${esc(p)}"
-        oninput="updatePlayer(${i},this.value)" autocapitalize="words" autocorrect="off" autocomplete="off"/>
+      <input class="field" id="player-input-${i}" placeholder="Player ${i+1}" value="${esc(p)}"
+        oninput="bufferPlayer(${i}, this.value)"
+        autocapitalize="words" autocorrect="off" autocomplete="off" spellcheck="false"/>
       ${state.players.length > 2 ? `<button class="btn-sm" onclick="delPlayer(${i})">✕</button>` : ''}
     </div>
   `).join('');
@@ -496,7 +481,9 @@ function renderResults() {
   return `
     <div class="rename-row">
       <input class="field" id="sessionNameInput" placeholder="e.g. Friday Night Bowling"
-        value="${esc(state.sessionName)}" oninput="state.sessionName=this.value" autocorrect="off" autocomplete="off"/>
+        value="${esc(state.sessionName)}"
+        oninput="bufferSessionName(this.value)"
+        autocorrect="off" autocomplete="off" spellcheck="false"/>
       <button class="rename-btn" onclick="saveSession()">💾 Save</button>
     </div>
     <div id="saveError" class="error" style="display:none;margin-bottom:10px;"></div>
@@ -573,13 +560,56 @@ function renderHistory() {
   `;
 }
 
-// ─── ACTIONS ──────────────────────────────────────────────────────────────────
+// ── Buffered input handlers (no re-render while typing) ──────────────────────
+function bufferPlayer(i, val) {
+  state.players[i] = val;
+  // Only re-render after user stops typing for 600ms
+  clearTimeout(inputTimers['player_' + i]);
+  inputTimers['player_' + i] = setTimeout(() => {
+    state.result = null;
+    render();
+    // Restore focus to the same input
+    const el = document.getElementById('player-input-' + i);
+    if (el) { el.focus(); el.setSelectionRange(el.value.length, el.value.length); }
+  }, 600);
+}
+
+function bufferSessionName(val) {
+  state.sessionName = val;
+  // No re-render needed for session name — it's read on save
+}
+
+// ── Actions ──────────────────────────────────────────────────────────────────
 function switchTab(t) { state.tab = t; state.expandedHist = null; render(); }
-function switchSessionTab(t) { state.sessionTab = t; render(); }
+function switchSessionTab(t) {
+  // Flush any pending player input before switching tabs
+  Object.keys(inputTimers).forEach(k => {
+    clearTimeout(inputTimers[k]);
+    delete inputTimers[k];
+  });
+  state.sessionTab = t;
+  render();
+}
 
 function updatePlayer(i, v) { state.players[i] = v; state.result = null; render(); }
-function addPlayer() { if (state.players.length < 4) { state.players.push(''); render(); } }
-function delPlayer(i) { if (state.players.length <= 2) return; state.players.splice(i,1); state.games=[]; state.result=null; render(); }
+function addPlayer() {
+  if (state.players.length < 4) {
+    state.players.push('');
+    render();
+    // Focus the new input
+    setTimeout(() => {
+      const el = document.getElementById('player-input-' + (state.players.length - 1));
+      if (el) el.focus();
+    }, 50);
+  }
+}
+function delPlayer(i) {
+  if (state.players.length <= 2) return;
+  state.players.splice(i,1);
+  state.games=[];
+  state.result=null;
+  render();
+}
 
 function addGame() {
   const active = state.players.map(p=>p.trim()).filter(Boolean);
@@ -604,16 +634,17 @@ function calculate() {
 
 function saveSession() {
   if (!state.result) return;
+  // Read directly from input in case bufferSessionName hasn't synced
+  const input = document.getElementById('sessionNameInput');
+  if (input) state.sessionName = input.value;
   const name = state.sessionName.trim();
   if (!name) {
-    const input = document.getElementById('sessionNameInput');
     if (input) { input.focus(); input.style.borderColor = '#e05c2a'; setTimeout(()=>{ input.style.borderColor = ''; }, 1500); }
     showSaveError('Please enter a session name before saving.');
     return;
   }
   const active = state.players.map(p=>p.trim()).filter(Boolean);
   let history = loadHistory();
-  // Purge sessions older than 30 days
   const cutoff = new Date();
   cutoff.setDate(cutoff.getDate() - 30);
   history = history.filter(s => new Date(s.date) >= cutoff);
@@ -661,11 +692,9 @@ function esc(str) {
   return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
-function bindEvents() {} // events are inline for simplicity
+function bindEvents() {}
 
-// ─── INIT ─────────────────────────────────────────────────────────────────────
 render();
 </script>
-
 </body>
 </html>
