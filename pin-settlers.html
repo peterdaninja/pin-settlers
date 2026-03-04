@@ -1,1 +1,671 @@
+<!DOCTYPE html>
 
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="Pin Settlers"/>
+<title>Pin Settlers</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Share+Tech+Mono&display=swap');
+
+:root {
+–yellow: #f5c842;
+–orange: #e05c2a;
+–green: #4af04a;
+–bg: #0a0a0f;
+–card: #13131e;
+–border: #2a2a4a;
+–dim: #4040a0;
+–text: #e8e0d0;
+–safe-top: env(safe-area-inset-top, 0px);
+–safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+- { box-sizing: border-box; -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; }
+
+body {
+background: var(–bg);
+font-family: ‘Share Tech Mono’, ‘Courier New’, monospace;
+color: var(–text);
+min-height: 100vh;
+overscroll-behavior: none;
+}
+
+input, select, button, textarea {
+font-family: ‘Share Tech Mono’, ‘Courier New’, monospace;
+-webkit-appearance: none;
+appearance: none;
+}
+
+/* LAYOUT */
+.app { display: flex; flex-direction: column; min-height: 100vh; }
+
+.header {
+text-align: center;
+padding: calc(var(–safe-top) + 20px) 16px 16px;
+background: #0d0d1a;
+border-bottom: 1px solid var(–border);
+}
+.header-title {
+font-family: ‘Black Ops One’, cursive;
+font-size: 2rem;
+color: var(–yellow);
+text-shadow: 0 0 8px #f5c84280;
+letter-spacing: 0.05em;
+}
+.header-sub {
+color: var(–orange);
+font-size: 0.65rem;
+letter-spacing: 0.25em;
+text-transform: uppercase;
+margin-top: 2px;
+}
+
+.tabs {
+display: flex;
+background: #0d0d1a;
+border-bottom: 1px solid var(–border);
+position: sticky;
+top: 0;
+z-index: 50;
+}
+.tab {
+flex: 1;
+padding: 10px 4px;
+background: transparent;
+border: none;
+border-bottom: 2px solid transparent;
+color: var(–dim);
+font-size: 0.6rem;
+letter-spacing: 0.12em;
+text-transform: uppercase;
+cursor: pointer;
+display: flex;
+flex-direction: column;
+align-items: center;
+gap: 2px;
+}
+.tab.active { color: var(–yellow); border-bottom-color: var(–yellow); }
+.tab-icon { font-size: 1.1rem; }
+
+.content {
+flex: 1;
+padding: 20px 16px calc(var(–safe-bottom) + 20px);
+max-width: 520px;
+margin: 0 auto;
+width: 100%;
+}
+
+/* TYPOGRAPHY */
+.sec-title {
+font-size: 0.65rem;
+letter-spacing: 0.3em;
+text-transform: uppercase;
+color: var(–yellow);
+text-shadow: 0 0 6px #f5c84250;
+border-bottom: 1px solid #f5c84225;
+padding-bottom: 8px;
+margin-bottom: 16px;
+}
+.green-title {
+font-size: 0.65rem;
+letter-spacing: 0.3em;
+text-transform: uppercase;
+color: var(–green);
+text-shadow: 0 0 6px #4af04a50;
+border-bottom: 1px solid #4af04a25;
+padding-bottom: 8px;
+margin-bottom: 14px;
+}
+
+/* INPUTS */
+.field {
+background: var(–card);
+border: 1.5px solid var(–border);
+border-radius: 10px;
+padding: 14px 16px;
+color: var(–text);
+font-size: 1rem;
+outline: none;
+width: 100%;
+transition: border-color 0.2s;
+}
+.field:focus { border-color: var(–yellow); }
+.field::placeholder { color: #3a3a6a; }
+
+select.field {
+background-image: url(“data:image/svg+xml,%3Csvg xmlns=‘http://www.w3.org/2000/svg’ width=‘12’ height=‘8’ viewBox=‘0 0 12 8’%3E%3Cpath fill=’%23f5c842’ d=‘M6 8L0 0h12z’/%3E%3C/svg%3E”);
+background-repeat: no-repeat;
+background-position: right 14px center;
+padding-right: 36px;
+cursor: pointer;
+}
+
+/* BUTTONS */
+.btn {
+border-radius: 10px;
+padding: 14px 20px;
+font-size: 0.8rem;
+letter-spacing: 0.15em;
+text-transform: uppercase;
+cursor: pointer;
+border: 1.5px solid var(–yellow);
+color: var(–yellow);
+background: transparent;
+width: 100%;
+transition: background 0.15s;
+}
+.btn:active { background: #f5c84215; }
+
+.btn-primary {
+background: var(–yellow);
+color: #0a0a0f;
+border-color: var(–yellow);
+font-family: ‘Black Ops One’, cursive;
+font-size: 1rem;
+padding: 16px;
+}
+.btn-primary:active { background: #d4a820; }
+
+.btn-danger {
+border-color: var(–orange);
+color: var(–orange);
+padding: 8px 14px;
+font-size: 0.65rem;
+width: auto;
+}
+.btn-danger:active { background: #e05c2a15; }
+
+.btn-ghost {
+border: 2px dashed #2a2a6a;
+color: var(–dim);
+background: transparent;
+padding: 16px;
+}
+.btn-ghost:active { border-color: var(–yellow); color: var(–yellow); }
+
+.btn-sm {
+width: 44px;
+height: 44px;
+border-radius: 10px;
+border: 1.5px solid var(–orange);
+color: var(–orange);
+background: transparent;
+font-size: 1rem;
+cursor: pointer;
+display: flex;
+align-items: center;
+justify-content: center;
+flex-shrink: 0;
+}
+
+.btn-subtle {
+border-color: #2a2a5a;
+color: #5050a0;
+background: transparent;
+padding: 12px;
+font-size: 0.7rem;
+}
+
+/* CARDS */
+.card {
+background: var(–card);
+border: 1px solid var(–border);
+border-radius: 12px;
+margin-bottom: 14px;
+overflow: hidden;
+}
+.card-head {
+display: flex;
+justify-content: space-between;
+align-items: center;
+padding: 14px 16px;
+border-bottom: 1px solid #1a1a3a;
+}
+.card-label {
+color: var(–orange);
+font-size: 0.7rem;
+letter-spacing: 0.2em;
+text-transform: uppercase;
+text-shadow: 0 0 6px #e05c2a50;
+}
+.card-body { padding: 14px 16px; }
+.card-hint { padding: 0 16px 12px; font-size: 0.62rem; color: #3a3a7a; letter-spacing: 0.05em; }
+
+/* PLAYER ROW */
+.player-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+
+/* ASSIGN ROW */
+.assign-row { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+.assign-name { color: #a0a0d0; font-size: 0.9rem; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* BALANCE ROW */
+.bal-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #1a2a1a; font-size: 0.95rem; }
+.pos { color: var(–green); text-shadow: 0 0 6px #4af04a50; font-weight: 700; }
+.neg { color: var(–orange); text-shadow: 0 0 6px #e05c2a50; font-weight: 700; }
+
+/* TX CARD */
+.tx-card { background: #0d0d1a; border: 1px solid #1a3a1a; border-radius: 10px; padding: 14px 16px; margin-bottom: 10px; display: flex; align-items: center; gap: 10px; font-size: 0.95rem; }
+.tx-from { color: var(–orange); }
+.tx-arrow { color: var(–green); font-size: 1.2rem; }
+.tx-to { color: var(–green); }
+.tx-amt { margin-left: auto; color: var(–green); font-family: ‘Black Ops One’, cursive; font-size: 1.1rem; text-shadow: 0 0 6px #4af04a50; }
+
+/* HISTORY */
+.hist-card { background: var(–card); border: 1px solid var(–border); border-radius: 12px; margin-bottom: 12px; overflow: hidden; cursor: pointer; }
+.hist-head { display: flex; justify-content: space-between; align-items: center; padding: 14px 16px; }
+.hist-date { color: var(–yellow); font-size: 0.85rem; }
+.hist-meta { color: var(–dim); font-size: 0.65rem; margin-top: 3px; letter-spacing: 0.05em; }
+.hist-right { display: flex; align-items: center; gap: 10px; }
+.hist-chevron { color: var(–dim); font-size: 0.8rem; transition: transform 0.2s; }
+.hist-chevron.open { transform: rotate(90deg); }
+.hist-body { border-top: 1px solid #1a1a3a; padding: 14px 16px; }
+
+/* EMPTY / MISC */
+.empty { text-align: center; color: #3a3a7a; padding: 40px 16px; font-size: 0.85rem; line-height: 2; }
+.all-clear { text-align: center; color: var(–green); text-shadow: 0 0 8px #4af04a50; font-size: 1.1rem; padding: 20px; }
+.gap { margin-bottom: 12px; }
+.gap-lg { margin-bottom: 20px; }
+.error { color: var(–orange); font-size: 0.78rem; margin-top: 10px; text-align: center; }
+
+.rename-row { display: flex; gap: 8px; margin-bottom: 14px; }
+.rename-row .field { font-size: 0.85rem; padding: 10px 14px; }
+.rename-btn { background: transparent; border: 1.5px solid var(–yellow); color: var(–yellow); border-radius: 10px; padding: 10px 14px; font-size: 0.65rem; letter-spacing: 0.1em; cursor: pointer; white-space: nowrap; }
+</style>
+
+</head>
+<body>
+<div class="app" id="app">
+  <div class="header">
+    <div style="font-size:1.8rem;margin-bottom:4px;filter:drop-shadow(0 0 8px #f5c84260)">🎳</div>
+    <div class="header-title">Pin Settlers</div>
+    <div class="header-sub">$5 per game · settle smart</div>
+  </div>
+  <div class="tabs" id="tabs"></div>
+  <div class="content" id="content"></div>
+</div>
+
+<script>
+// ─── STATE ────────────────────────────────────────────────────────────────────
+const COST = 5;
+const RANKS = ['1st 🥇','2nd 🥈','3rd 🥉','4th'];
+
+let state = {
+  tab: 'session',        // session | history
+  sessionTab: 'setup',   // setup | games | results
+  players: ['','',''],
+  games: [],
+  result: null,
+  sessionName: '',
+  error: '',
+  expandedHist: null,
+};
+
+function loadHistory() {
+  try { return JSON.parse(localStorage.getItem('pinSettlers_history') || '[]'); }
+  catch { return []; }
+}
+function saveHistory(h) {
+  localStorage.setItem('pinSettlers_history', JSON.stringify(h));
+}
+
+// ─── LOGIC ────────────────────────────────────────────────────────────────────
+function computeBalances(players, games) {
+  const bal = {};
+  players.forEach(p => bal[p] = 0);
+  for (const g of games) {
+    const grp = {};
+    for (const a of g.assignments) {
+      if (!grp[a.rank]) grp[a.rank] = [];
+      grp[a.rank].push(a.player);
+    }
+    const ranks = Object.keys(grp).map(Number).sort((a,b)=>a-b);
+    const winners = grp[ranks[0]];
+    const losers = ranks.slice(1).flatMap(r => grp[r]);
+    const pot = losers.length * COST;
+    winners.forEach(w => bal[w] += pot / winners.length);
+    losers.forEach(l => bal[l] -= COST);
+  }
+  return bal;
+}
+
+function settle(bal) {
+  const cred = [], debt = [];
+  for (const [n,b] of Object.entries(bal)) {
+    if (b > 0.001) cred.push({name:n, amount:b});
+    else if (b < -0.001) debt.push({name:n, amount:-b});
+  }
+  cred.sort((a,b) => b.amount - a.amount);
+  debt.sort((a,b) => b.amount - a.amount);
+  const txs = [];
+  let i=0, j=0;
+  while (i<cred.length && j<debt.length) {
+    const c=cred[i], d=debt[j], amt=Math.min(c.amount, d.amount);
+    txs.push({from:d.name, to:c.name, amount:amt});
+    c.amount -= amt; d.amount -= amt;
+    if (c.amount < 0.001) i++;
+    if (d.amount < 0.001) j++;
+  }
+  return txs;
+}
+
+function formatDate(iso) {
+  const d = new Date(iso);
+  return d.toLocaleDateString('en-US', {weekday:'short', month:'short', day:'numeric', year:'numeric'});
+}
+
+function todayISO() {
+  return new Date().toISOString().split('T')[0];
+}
+
+// ─── RENDER ───────────────────────────────────────────────────────────────────
+function render() {
+  renderTabs();
+  renderContent();
+}
+
+function renderTabs() {
+  const tabs = document.getElementById('tabs');
+  const items = [
+    {id:'session', icon:'🎳', label:'Session'},
+    {id:'history', icon:'📋', label:'History'},
+  ];
+  tabs.innerHTML = items.map(t => `
+    <button class="tab ${state.tab===t.id?'active':''}" onclick="switchTab('${t.id}')">
+      <span class="tab-icon">${t.icon}</span>${t.label}
+    </button>
+  `).join('');
+}
+
+function renderContent() {
+  const el = document.getElementById('content');
+  if (state.tab === 'session') el.innerHTML = renderSession();
+  else el.innerHTML = renderHistory();
+  bindEvents();
+}
+
+function renderSession() {
+  const inner = state.sessionTab === 'setup'  ? renderSetup()
+              : state.sessionTab === 'games'  ? renderGames()
+              : renderResults();
+
+  const subtabs = [
+    {id:'setup', icon:'👤', label:'Players'},
+    {id:'games', icon:'🎳', label:`Games${state.games.length?` (${state.games.length})`:''}` },
+    {id:'results', icon:'💰', label:'Results'},
+  ].map(t => `
+    <button class="tab ${state.sessionTab===t.id?'active':''}" style="flex:1;font-size:0.58rem;"
+      onclick="switchSessionTab('${t.id}')">
+      <span class="tab-icon">${t.icon}</span>${t.label}
+    </button>
+  `).join('');
+
+  return `
+    <div style="display:flex;border-bottom:1px solid #2a2a4a;margin:-20px -16px 20px;background:#0d0d1a;">
+      ${subtabs}
+    </div>
+    ${inner}
+  `;
+}
+
+function renderSetup() {
+  const rows = state.players.map((p,i) => `
+    <div class="player-row">
+      <input class="field" placeholder="Player ${i+1}" value="${esc(p)}"
+        oninput="updatePlayer(${i},this.value)" autocapitalize="words" autocorrect="off" autocomplete="off"/>
+      ${state.players.length > 2 ? `<button class="btn-sm" onclick="delPlayer(${i})">✕</button>` : ''}
+    </div>
+  `).join('');
+
+  const active = state.players.map(p=>p.trim()).filter(Boolean);
+
+  return `
+    <div class="sec-title">⚡ Players</div>
+    ${rows}
+    ${state.players.length < 4 ? `<button class="btn gap" onclick="addPlayer()">+ Add Player</button>` : ''}
+    ${active.length >= 2 ? `
+      <div style="margin-top:20px;">
+        <button class="btn btn-primary" onclick="switchSessionTab('games')">Next → Add Games</button>
+      </div>` : ''}
+  `;
+}
+
+function renderGames() {
+  const active = state.players.map(p=>p.trim()).filter(Boolean);
+  const gameCards = state.games.map((g,gi) => `
+    <div class="card">
+      <div class="card-head">
+        <span class="card-label">Game ${gi+1}</span>
+        <button class="btn btn-danger" onclick="delGame(${gi})">Remove</button>
+      </div>
+      <div class="card-body">
+        ${g.assignments.map((a,pi) => `
+          <div class="assign-row">
+            <span class="assign-name">${esc(a.player)}</span>
+            <select class="field" style="width:140px;padding:10px 36px 10px 12px;font-size:0.85rem;"
+              onchange="updateRank(${gi},${pi},this.value)">
+              ${g.assignments.map((_,k) => `
+                <option value="${k+1}" ${a.rank===k+1?'selected':''}>${RANKS[k]||`${k+1}th`}</option>
+              `).join('')}
+            </select>
+          </div>
+        `).join('')}
+      </div>
+      <div class="card-hint">Same rank = tie · only 1st place wins</div>
+    </div>
+  `).join('');
+
+  return `
+    <div class="sec-title">🎳 Game Results</div>
+    ${gameCards}
+    ${active.length >= 2
+      ? `<button class="btn btn-ghost gap-lg" onclick="addGame()">+ Add Game</button>`
+      : `<div class="empty">Go to Players tab first</div>`}
+    ${state.games.length > 0 ? `
+      <button class="btn btn-primary" onclick="calculate()">🎳 Settle Up</button>
+      ${state.error ? `<div class="error">⚠ ${esc(state.error)}</div>` : ''}
+    ` : ''}
+  `;
+}
+
+function renderResults() {
+  if (!state.result) return `<div class="empty">No results yet.<br/>Add games and tap<br/>🎳 <strong>Settle Up</strong></div>`;
+
+  const {bal, txs} = state.result;
+  const active = state.players.map(p=>p.trim()).filter(Boolean);
+
+  const balRows = active.map(n => {
+    const b = bal[n] || 0;
+    return `<div class="bal-row"><span>${esc(n)}</span><span class="${b>=0?'pos':'neg'}">${b>=0?'+':''}$${b.toFixed(2)}</span></div>`;
+  }).join('');
+
+  const txCards = txs.length === 0
+    ? `<div class="all-clear">Everyone is square! 🎉</div>`
+    : txs.map(tx => `
+        <div class="tx-card">
+          <span class="tx-from">${esc(tx.from)}</span>
+          <span class="tx-arrow">→</span>
+          <span class="tx-to">${esc(tx.to)}</span>
+          <span class="tx-amt">$${tx.amount.toFixed(2)}</span>
+        </div>
+      `).join('');
+
+  return `
+    <div class="rename-row">
+      <input class="field" id="sessionNameInput" placeholder="e.g. Friday Night Bowling"
+        value="${esc(state.sessionName)}" oninput="state.sessionName=this.value" autocorrect="off" autocomplete="off"/>
+      <button class="rename-btn" onclick="saveSession()">💾 Save</button>
+    </div>
+    <div id="saveError" class="error" style="display:none;margin-bottom:10px;"></div>
+
+    <div class="sec-title" style="color:#f5c842;">💰 Net Balances · ${state.games.length} Game${state.games.length!==1?'s':''}</div>
+    ${balRows}
+
+    <div class="green-title" style="margin-top:20px;">✅ Pay Up · ${txs.length} Transaction${txs.length!==1?'s':''}</div>
+    ${txCards}
+
+    <div style="margin-top:24px;">
+      <button class="btn btn-subtle" onclick="newSession()">🔄 New Session</button>
+    </div>
+  `;
+}
+
+function renderHistory() {
+  const history = loadHistory();
+  if (history.length === 0) return `<div class="empty">No saved sessions yet.<br/>Complete a game, name it,<br/>and tap 💾 Save.</div>`;
+
+  return `
+    <div class="sec-title">📋 Past Sessions <span style="color:#3a3a7a;font-size:0.6em;letter-spacing:0.1em;">· last 30 days</span></div>
+    ${history.slice().reverse().map((s,ri) => {
+      const i = history.length - 1 - ri;
+      const expanded = state.expandedHist === i;
+      const txCount = s.txs.length;
+      const label = s.name || formatDate(s.date);
+
+      const detail = expanded ? `
+        <div class="hist-body">
+          <div style="font-size:0.65rem;color:#5050a0;letter-spacing:0.1em;margin-bottom:10px;">${formatDate(s.date)}</div>
+          <div style="font-size:0.65rem;color:#6060a0;letter-spacing:0.2em;text-transform:uppercase;margin-bottom:8px;">Balances</div>
+          ${Object.entries(s.bal).map(([n,b])=>`
+            <div class="bal-row" style="font-size:0.85rem;">
+              <span>${esc(n)}</span>
+              <span class="${b>=0?'pos':'neg'}">${b>=0?'+':''}$${b.toFixed(2)}</span>
+            </div>
+          `).join('')}
+          <div style="font-size:0.65rem;color:#6060a0;letter-spacing:0.2em;text-transform:uppercase;margin:14px 0 8px;">Transactions</div>
+          ${s.txs.length === 0
+            ? `<div style="color:#4af04a;font-size:0.85rem;padding:8px 0;">Everyone was square 🎉</div>`
+            : s.txs.map(tx=>`
+                <div class="tx-card" style="font-size:0.85rem;padding:10px 14px;">
+                  <span class="tx-from">${esc(tx.from)}</span>
+                  <span class="tx-arrow" style="font-size:1rem;">→</span>
+                  <span class="tx-to">${esc(tx.to)}</span>
+                  <span class="tx-amt" style="font-size:0.95rem;">$${tx.amount.toFixed(2)}</span>
+                </div>
+              `).join('')}
+          <div style="margin-top:14px;">
+            <button class="btn btn-danger" style="width:100%;padding:10px;" onclick="deleteSession(${i},event)">🗑 Delete This Session</button>
+          </div>
+        </div>
+      ` : '';
+
+      return `
+        <div class="hist-card" onclick="toggleHist(${i})">
+          <div class="hist-head">
+            <div>
+              <div class="hist-date">${esc(label)}</div>
+              <div class="hist-meta">${s.games} game${s.games!==1?'s':''} · ${s.players.join(', ')}</div>
+            </div>
+            <div class="hist-right">
+              <div style="text-align:right;">
+                <div style="font-size:0.7rem;color:#5050a0;">${txCount} tx</div>
+              </div>
+              <span class="hist-chevron ${expanded?'open':''}">▶</span>
+            </div>
+          </div>
+          ${detail}
+        </div>
+      `;
+    }).join('')}
+  `;
+}
+
+// ─── ACTIONS ──────────────────────────────────────────────────────────────────
+function switchTab(t) { state.tab = t; state.expandedHist = null; render(); }
+function switchSessionTab(t) { state.sessionTab = t; render(); }
+
+function updatePlayer(i, v) { state.players[i] = v; state.result = null; render(); }
+function addPlayer() { if (state.players.length < 4) { state.players.push(''); render(); } }
+function delPlayer(i) { if (state.players.length <= 2) return; state.players.splice(i,1); state.games=[]; state.result=null; render(); }
+
+function addGame() {
+  const active = state.players.map(p=>p.trim()).filter(Boolean);
+  if (active.length < 2) return;
+  state.games.push({assignments: active.map(p=>({player:p, rank:1}))});
+  state.result = null;
+  render();
+}
+function delGame(i) { state.games.splice(i,1); state.result=null; render(); }
+function updateRank(gi, pi, r) { state.games[gi].assignments[pi].rank = Number(r); state.result=null; render(); }
+
+function calculate() {
+  state.error = '';
+  const active = state.players.map(p=>p.trim()).filter(Boolean);
+  if (active.length < 2) { state.error = 'Enter at least 2 player names.'; render(); return; }
+  if (state.games.length === 0) { state.error = 'Add at least one game.'; render(); return; }
+  const bal = computeBalances(active, state.games);
+  state.result = {bal, txs: settle(bal)};
+  state.sessionTab = 'results';
+  render();
+}
+
+function saveSession() {
+  if (!state.result) return;
+  const name = state.sessionName.trim();
+  if (!name) {
+    const input = document.getElementById('sessionNameInput');
+    if (input) { input.focus(); input.style.borderColor = '#e05c2a'; setTimeout(()=>{ input.style.borderColor = ''; }, 1500); }
+    showSaveError('Please enter a session name before saving.');
+    return;
+  }
+  const active = state.players.map(p=>p.trim()).filter(Boolean);
+  let history = loadHistory();
+  // Purge sessions older than 30 days
+  const cutoff = new Date();
+  cutoff.setDate(cutoff.getDate() - 30);
+  history = history.filter(s => new Date(s.date) >= cutoff);
+  history.push({
+    date: todayISO(),
+    name,
+    players: active,
+    games: state.games.length,
+    bal: state.result.bal,
+    txs: state.result.txs,
+  });
+  saveHistory(history);
+  const btn = document.querySelector('.rename-btn');
+  if (btn) { btn.textContent = '✅ Saved!'; setTimeout(()=>{ btn.textContent = '💾 Save'; }, 1500); }
+}
+
+function showSaveError(msg) {
+  const el = document.getElementById('saveError');
+  if (el) { el.textContent = msg; el.style.display = 'block'; setTimeout(()=>{ el.style.display='none'; }, 2500); }
+}
+
+function newSession() {
+  state.players = ['','',''];
+  state.games = [];
+  state.result = null;
+  state.sessionName = '';
+  state.error = '';
+  state.sessionTab = 'setup';
+  render();
+}
+
+function toggleHist(i) { state.expandedHist = state.expandedHist === i ? null : i; render(); }
+
+function deleteSession(i, e) {
+  e.stopPropagation();
+  const history = loadHistory();
+  history.splice(i, 1);
+  saveHistory(history);
+  state.expandedHist = null;
+  render();
+}
+
+function esc(str) {
+  if (!str) return '';
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function bindEvents() {} // events are inline for simplicity
+
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+render();
+</script>
+
+</body>
+</html>
