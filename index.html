@@ -305,14 +305,8 @@ function computeBalances(players, games) {
   const bal = {};
   players.forEach(p => bal[p] = 0);
   for (const g of games) {
-    const grp = {};
-    for (const a of g.assignments) {
-      if (!grp[a.rank]) grp[a.rank] = [];
-      grp[a.rank].push(a.player);
-    }
-    const ranks = Object.keys(grp).map(Number).sort((a,b)=>a-b);
-    const winners = grp[ranks[0]];
-    const losers = ranks.slice(1).flatMap(r => grp[r]);
+    const winners = g.winners;
+    const losers = players.filter(p => !winners.includes(p));
     const pot = losers.length * COST;
     winners.forEach(w => bal[w] += pot / winners.length);
     losers.forEach(l => bal[l] -= COST);
@@ -427,19 +421,26 @@ function renderGames() {
         <button class="btn btn-danger" onclick="delGame(${gi})">Remove</button>
       </div>
       <div class="card-body">
-        ${g.assignments.map((a,pi) => `
-          <div class="assign-row">
-            <span class="assign-name">${esc(a.player)}</span>
-            <select class="field" style="width:140px;padding:10px 36px 10px 12px;font-size:0.85rem;"
-              onchange="updateRank(${gi},${pi},this.value)">
-              ${g.assignments.map((_,k) => `
-                <option value="${k+1}" ${a.rank===k+1?'selected':''}>${RANKS[k]||`${k+1}th`}</option>
-              `).join('')}
-            </select>
-          </div>
-        `).join('')}
+        <div style="font-size:0.6rem;color:#5050a0;letter-spacing:0.2em;text-transform:uppercase;margin-bottom:10px;">Tap winner(s)</div>
+        ${active.map(p => {
+          const isWinner = g.winners.includes(p);
+          return `
+            <button onclick="toggleWinner(${gi},'${esc(p)}')" style="
+              display:flex;align-items:center;gap:10px;width:100%;
+              background:${isWinner ? '#1a3a1a' : 'transparent'};
+              border:1.5px solid ${isWinner ? 'var(--green)' : 'var(--border)'};
+              border-radius:10px;padding:12px 14px;margin-bottom:8px;
+              color:${isWinner ? 'var(--green)' : '#a0a0d0'};
+              font-family:inherit;font-size:0.9rem;cursor:pointer;text-align:left;
+            ">
+              <span style="font-size:1.1rem;">${isWinner ? '🥇' : '○'}</span>
+              <span>${esc(p)}</span>
+              ${isWinner ? '<span style="margin-left:auto;font-size:0.65rem;letter-spacing:0.15em;">WINNER</span>' : ''}
+            </button>
+          `;
+        }).join('')}
       </div>
-      <div class="card-hint">Same rank = tie · only 1st place wins</div>
+      <div class="card-hint">Tap multiple players for a tie</div>
     </div>
   `).join('');
 
@@ -614,18 +615,30 @@ function delPlayer(i) {
 function addGame() {
   const active = state.players.map(p=>p.trim()).filter(Boolean);
   if (active.length < 2) return;
-  state.games.push({assignments: active.map(p=>({player:p, rank:1}))});
+  state.games.push({ winners: [] });
   state.result = null;
   render();
 }
+function toggleWinner(gi, player) {
+  const w = state.games[gi].winners;
+  const idx = w.indexOf(player);
+  if (idx === -1) w.push(player);
+  else w.splice(idx, 1);
+  state.result = null;
+  render();
+}
+
 function delGame(i) { state.games.splice(i,1); state.result=null; render(); }
-function updateRank(gi, pi, r) { state.games[gi].assignments[pi].rank = Number(r); state.result=null; render(); }
 
 function calculate() {
   state.error = '';
   const active = state.players.map(p=>p.trim()).filter(Boolean);
   if (active.length < 2) { state.error = 'Enter at least 2 player names.'; render(); return; }
   if (state.games.length === 0) { state.error = 'Add at least one game.'; render(); return; }
+  for (let i = 0; i < state.games.length; i++) {
+    if (state.games[i].winners.length === 0) { state.error = `Game ${i+1} needs at least one winner.`; render(); return; }
+    if (state.games[i].winners.length === active.length) { state.error = `Game ${i+1}: everyone can't win.`; render(); return; }
+  }
   const bal = computeBalances(active, state.games);
   state.result = {bal, txs: settle(bal)};
   state.sessionTab = 'results';
