@@ -302,6 +302,13 @@ function loadHistory() {
 function saveHistory(h) {
   localStorage.setItem('pinSettlers_history', JSON.stringify(h));
 }
+function loadSavedPlayers() {
+  try { return JSON.parse(localStorage.getItem('pinSettlers_players') || 'null'); }
+  catch { return null; }
+}
+function savePlayers(players) {
+  localStorage.setItem('pinSettlers_players', JSON.stringify(players));
+}
 
 function computeBalances(players, games) {
   const bal = {};
@@ -641,6 +648,7 @@ function calculate() {
     if (state.games[i].winners.length === 0) { state.error = `Game ${i+1} needs at least one winner.`; render(); return; }
     if (state.games[i].winners.length === active.length) { state.error = `Game ${i+1}: everyone can't win.`; render(); return; }
   }
+  savePlayers(active);
   const bal = computeBalances(active, state.games);
   state.result = {bal, txs: settle(bal)};
   state.sessionTab = 'results';
@@ -682,7 +690,8 @@ function showSaveError(msg) {
 }
 
 function newSession() {
-  state.players = ['','',''];
+  const saved = loadSavedPlayers();
+  state.players = saved && saved.length >= 2 ? [...saved] : ['','',''];
   state.games = [];
   state.result = null;
   state.sessionName = '';
@@ -708,6 +717,9 @@ function esc(str) {
 }
 
 function bindEvents() {}
+
+const _savedPlayers = loadSavedPlayers();
+if (_savedPlayers && _savedPlayers.length >= 2) state.players = [..._savedPlayers];
 
 render();
 </script>
