@@ -16,6 +16,7 @@
   --yellow: #f5c842;
   --orange: #e05c2a;
   --green: #4af04a;
+  --blue: #4ab8f0;
   --bg: #0a0a0f;
   --card: #13131e;
   --border: #2a2a4a;
@@ -119,6 +120,16 @@ input, select, button, textarea {
   padding-bottom: 8px;
   margin-bottom: 14px;
 }
+.blue-title {
+  font-size: 0.65rem;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--blue);
+  text-shadow: 0 0 6px #4ab8f050;
+  border-bottom: 1px solid #4ab8f025;
+  padding-bottom: 8px;
+  margin-bottom: 14px;
+}
 
 .field {
   background: var(--card);
@@ -166,6 +177,16 @@ select.field {
   padding: 16px;
 }
 .btn-primary:active { background: #d4a820; }
+
+.btn-blue {
+  background: var(--blue);
+  color: #0a0a0f;
+  border-color: var(--blue);
+  font-family: 'Black Ops One', cursive;
+  font-size: 1rem;
+  padding: 16px;
+}
+.btn-blue:active { background: #2a90c8; }
 
 .btn-danger {
   border-color: var(--orange);
@@ -264,6 +285,264 @@ select.field {
 .rename-row { display: flex; gap: 8px; margin-bottom: 14px; }
 .rename-row .field { font-size: 0.85rem; padding: 10px 14px; }
 .rename-btn { background: transparent; border: 1.5px solid var(--yellow); color: var(--yellow); border-radius: 10px; padding: 10px 14px; font-size: 0.65rem; letter-spacing: 0.1em; cursor: pointer; white-space: nowrap; }
+
+/* ── Adjust tab styles ── */
+.field-label {
+  font-size: 0.6rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #6060a0;
+  margin-bottom: 6px;
+  margin-top: 14px;
+  display: block;
+}
+.field-label:first-child { margin-top: 0; }
+
+.hand-toggle {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 4px;
+}
+.hand-btn {
+  flex: 1;
+  padding: 12px;
+  border-radius: 10px;
+  border: 1.5px solid var(--border);
+  background: transparent;
+  color: #5050a0;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.8rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.hand-btn.active {
+  border-color: var(--yellow);
+  color: var(--yellow);
+  background: #f5c84210;
+}
+
+.chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+.chip {
+  padding: 9px 14px;
+  border-radius: 8px;
+  border: 1.5px solid var(--border);
+  background: transparent;
+  color: #5050a0;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.chip.active-green { border-color: var(--green); color: var(--green); background: #4af04a10; }
+.chip.active-yellow { border-color: var(--yellow); color: var(--yellow); background: #f5c84210; }
+.chip.active-orange { border-color: var(--orange); color: var(--orange); background: #e05c2a10; }
+
+/* Board slider */
+.board-slider-wrap {
+  background: var(--card);
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  padding: 14px 16px 12px;
+  margin-bottom: 4px;
+  transition: border-color 0.2s;
+}
+.board-slider-wrap:focus-within { border-color: var(--yellow); }
+.board-slider-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 10px;
+}
+.board-slider-num {
+  font-family: 'Black Ops One', cursive;
+  font-size: 1.6rem;
+  color: var(--yellow);
+  text-shadow: 0 0 8px #f5c84260;
+  line-height: 1;
+  min-width: 2ch;
+}
+.board-slider-num.unset { color: #2a2a5a; text-shadow: none; }
+.board-slider-unit {
+  font-size: 0.58rem;
+  letter-spacing: 0.2em;
+  color: #4040a0;
+  text-transform: uppercase;
+}
+.board-slider-track {
+  width: 100%;
+  height: 4px;
+  background: #1a1a3a;
+  border-radius: 2px;
+  position: relative;
+  margin-bottom: 6px;
+}
+.board-slider-fill {
+  position: absolute;
+  left: 0; top: 0; height: 100%;
+  background: var(--yellow);
+  border-radius: 2px;
+  transition: width 0.05s;
+  opacity: 0.6;
+}
+.board-slider-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.55rem;
+  color: #3a3a6a;
+  letter-spacing: 0.05em;
+  margin-top: 2px;
+}
+input[type=range].board-range {
+  width: 100%;
+  height: 28px;
+  background: transparent;
+  cursor: pointer;
+  margin: 0;
+  padding: 0;
+  position: relative;
+  z-index: 1;
+  margin-top: -22px;
+  display: block;
+}
+input[type=range].board-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  background: var(--yellow);
+  border: 2px solid #0a0a0f;
+  box-shadow: 0 0 6px #f5c84260;
+  margin-top: -9px;
+}
+input[type=range].board-range::-moz-range-thumb {
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  background: var(--yellow);
+  border: 2px solid #0a0a0f;
+}
+input[type=range].board-range::-webkit-slider-runnable-track {
+  height: 4px; background: transparent; border-radius: 2px;
+}
+input[type=range].board-range::-moz-range-track {
+  height: 4px; background: transparent; border-radius: 2px;
+}
+input[type=range].board-range:focus { outline: none; }
+
+/* Speed slider variant (green) */
+input[type=range].speed-range::-webkit-slider-thumb {
+  background: var(--blue);
+  box-shadow: 0 0 6px #4ab8f060;
+}
+input[type=range].speed-range::-moz-range-thumb { background: var(--blue); }
+.speed-slider-num { color: var(--blue) !important; text-shadow: 0 0 8px #4ab8f060 !important; }
+.speed-slider-fill { background: var(--blue) !important; }
+.speed-slider-wrap:focus-within { border-color: var(--blue) !important; }
+
+/* Result output panel */
+.adj-result {
+  background: #0a0f0a;
+  border: 1px solid #1a4a1a;
+  border-radius: 14px;
+  overflow: hidden;
+  margin-top: 4px;
+}
+.adj-result-head {
+  background: #0d1a0d;
+  border-bottom: 1px solid #1a4a1a;
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.adj-result-title {
+  font-family: 'Black Ops One', cursive;
+  color: var(--green);
+  font-size: 1rem;
+  letter-spacing: 0.05em;
+  text-shadow: 0 0 8px #4af04a50;
+}
+.adj-severity {
+  margin-left: auto;
+  font-size: 0.6rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border-radius: 6px;
+  border: 1px solid;
+}
+.sev-minor { color: var(--green); border-color: #4af04a40; background: #4af04a10; }
+.sev-moderate { color: var(--yellow); border-color: #f5c84240; background: #f5c84210; }
+.sev-major { color: var(--orange); border-color: #e05c2a40; background: #e05c2a10; }
+
+.adj-block {
+  padding: 14px 16px;
+  border-bottom: 1px solid #0d2a0d;
+}
+.adj-block:last-child { border-bottom: none; }
+.adj-block-label {
+  font-size: 0.58rem;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: #4a7a4a;
+  margin-bottom: 8px;
+}
+.adj-line {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin-bottom: 6px;
+}
+.adj-move {
+  font-family: 'Black Ops One', cursive;
+  font-size: 1.4rem;
+  color: var(--green);
+  text-shadow: 0 0 8px #4af04a60;
+  min-width: 80px;
+}
+.adj-move-detail { font-size: 0.8rem; color: #80c080; }
+.adj-why { font-size: 0.72rem; color: #4a7a4a; line-height: 1.6; margin-top: 6px; }
+.adj-cue {
+  background: #0d200d;
+  border: 1px solid #1a4a1a;
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 0.78rem;
+  color: #80d080;
+  line-height: 1.6;
+  margin-top: 10px;
+}
+.adj-warn {
+  background: #1a0f00;
+  border: 1px solid #4a2a00;
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 0.78rem;
+  color: #c08040;
+  line-height: 1.6;
+  margin-top: 10px;
+}
+
+.lane-viz {
+  padding: 16px;
+  background: #080810;
+  border-bottom: 1px solid #0d2a0d;
+}
+.lane-viz-label {
+  font-size: 0.58rem;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: #4a7a4a;
+  margin-bottom: 10px;
+}
+.lane-svg-wrap { width: 100%; }
 </style>
 </head>
 <body>
@@ -279,7 +558,6 @@ select.field {
 
 <script>
 const COST = 5;
-const RANKS = ['1st 🥇','2nd 🥈','3rd 🥉','4th'];
 
 let state = {
   tab: 'session',
@@ -290,26 +568,33 @@ let state = {
   sessionName: '',
   error: '',
   expandedHist: null,
+  adj: {
+    hand: 'right',
+    stance: '',
+    target: '',
+    entry: '',
+    speed: '',
+    reaction: '',   // 'early' | 'normal' | 'late'
+    miss: '',       // 'brooklyn' | 'light-left' | 'light-right' | 'corner-left' | 'corner-right'
+    result: null,
+  },
 };
 
-// Debounce timers for player name inputs — prevents re-render killing focus
 const inputTimers = {};
 
+/* ── Storage ── */
 function loadHistory() {
   try { return JSON.parse(localStorage.getItem('pinSettlers_history') || '[]'); }
   catch { return []; }
 }
-function saveHistory(h) {
-  localStorage.setItem('pinSettlers_history', JSON.stringify(h));
-}
+function saveHistory(h) { localStorage.setItem('pinSettlers_history', JSON.stringify(h)); }
 function loadSavedPlayers() {
   try { return JSON.parse(localStorage.getItem('pinSettlers_players') || 'null'); }
   catch { return null; }
 }
-function savePlayers(players) {
-  localStorage.setItem('pinSettlers_players', JSON.stringify(players));
-}
+function savePlayers(p) { localStorage.setItem('pinSettlers_players', JSON.stringify(p)); }
 
+/* ── Settlement math ── */
 function computeBalances(players, games) {
   const bal = {};
   players.forEach(p => bal[p] = 0);
@@ -322,7 +607,6 @@ function computeBalances(players, games) {
   }
   return bal;
 }
-
 function settle(bal) {
   const cred = [], debt = [];
   for (const [n,b] of Object.entries(bal)) {
@@ -349,15 +633,165 @@ function formatDate(iso) {
 }
 function todayISO() { return new Date().toISOString().split('T')[0]; }
 
-function render() {
-  renderTabs();
-  renderContent();
+/* ══════════════════════════════════════════════
+   ADJUSTMENT ENGINE
+   ══════════════════════════════════════════════ */
+function computeAdjustment(adj) {
+  const hand = adj.hand;
+  const stance = parseInt(adj.stance);
+  const target = parseInt(adj.target);
+  const entry  = parseInt(adj.entry);
+  const speed  = parseFloat(adj.speed);
+  const reaction = adj.reaction;
+  const miss = adj.miss;
+
+  // Pocket board: 17 for right-handed, 17 for left (mirrored, same number on their side)
+  // For RH: higher board # = further left (toward gutter on left)
+  // Board 17 = ideal entry for both hands on their respective sides
+  const POCKET = 17;
+
+  // Entry error: positive = hitting too far right (thin/light), negative = too far left (high/brooklyn)
+  // RH: if entry < 17, hitting left (high/brooklyn); if entry > 17, hitting right (thin)
+  // LH: mirrored
+  let entryError = 0;
+  if (hand === 'right') {
+    entryError = entry - POCKET; // positive = right of pocket (light/thin), negative = left (high)
+  } else {
+    entryError = POCKET - entry; // mirrored for lefty
+  }
+
+  // Miss category analysis
+  // brooklyn = went all the way left past headpin (RH) or right (LH) — entryError strongly negative
+  // light-left = hit too far left, light (RH: high on headpin)
+  // light-right = hit too far right, thin (RH)
+  // corner-left = left corner pin (7 for RH) — ball crossed too far in
+  // corner-right = right corner pin (10 for RH) — ball too far right/flat angle
+
+  let missBoards = 0; // how many boards to move
+  let missDir = ''; // 'left' or 'right' (in terms of feet/target movement)
+
+  if (miss === 'brooklyn') {
+    // Crossed headpin, went left — need to move right (for RH: move feet right, target right)
+    missBoards = hand === 'right' ? Math.max(3, Math.abs(entryError)) : Math.max(3, Math.abs(entryError));
+    missDir = hand === 'right' ? 'right' : 'left';
+  } else if (miss === 'light-left') {
+    // High on headpin / left side — move slightly right
+    missBoards = Math.max(1, Math.round(Math.abs(entryError) * 0.7));
+    missDir = hand === 'right' ? 'right' : 'left';
+  } else if (miss === 'light-right') {
+    // Thin on headpin / right side — move left
+    missBoards = Math.max(1, Math.round(Math.abs(entryError) * 0.7));
+    missDir = hand === 'right' ? 'left' : 'right';
+  } else if (miss === 'corner-left') {
+    // 7-pin for RH — ball went high/crossing, flat angle or too much hook
+    missBoards = 2;
+    missDir = hand === 'right' ? 'right' : 'left';
+  } else if (miss === 'corner-right') {
+    // 10-pin for RH — thin hit, need to move inside
+    missBoards = 2;
+    missDir = hand === 'right' ? 'left' : 'right';
+  }
+
+  // 2-1 rule: feet move 2x what target moves, same direction
+  let feetMove = missBoards * 2;
+  let targetMove = missBoards;
+
+  // Ball reaction modifier
+  // If hooking early: ball runs out of energy — target adjustment must compensate
+  let reactionNote = '';
+  let targetDepthCue = '';
+  let shapeSeverity = '';
+
+  if (reaction === 'early') {
+    // Ball hooking too early = losing angle at breakpoint
+    // Move target deeper (toward pins) by 1-2 boards AND reduce feet adjustment slightly
+    targetDepthCue = `Also move your target 1–2 boards deeper (farther down the lane toward the pins). The ball is hooking before the breakpoint, burning up energy early — a deeper target gives it more room to travel before it turns.`;
+    reactionNote = 'Early hook detected';
+    shapeSeverity = 'moderate';
+  } else if (reaction === 'late') {
+    // Ball skidding too long = not enough friction, angle is flat
+    targetDepthCue = `Also move your target 1–2 boards shallower (closer to the foul line). The ball is skidding past the breakpoint and arriving flat — a shallower target lets it pick up friction sooner and create a better angle.`;
+    reactionNote = 'Late/skid detected';
+    shapeSeverity = 'moderate';
+  }
+
+  // Speed analysis
+  // Ideal stroker speed: ~16–18 mph. Below 15 = too slow (hooks too much), above 19 = too fast (skids)
+  let speedNote = '';
+  let speedCue = '';
+  const SPEED_LOW = 15, SPEED_HIGH = 19;
+  if (speed && speed < SPEED_LOW) {
+    speedNote = `Speed low (${speed} mph)`;
+    speedCue = `Your ball speed is on the slower side. This amplifies hook and can cause the ball to burn up early or drive through the nose. Try releasing 1–2 mph faster by pushing the ball out more on the pushaway, or shortening your backswing slightly.`;
+  } else if (speed && speed > SPEED_HIGH) {
+    speedNote = `Speed high (${speed} mph)`;
+    speedCue = `Your ball speed is higher than typical for a stroker. The ball may be skidding too far and arriving with a flat angle. Try slowing your approach pace or letting the ball swing more freely rather than muscling it through.`;
+  }
+
+  // Entry angle diagnosis
+  // We estimate angle from the differential between target board and entry board
+  // Ideal entry angle ~4–5° for stroker. Rough proxy: (target - entry) differential
+  // The bigger the board differential between target and entry, the steeper the angle
+  let angleCue = '';
+  const boardDiff = Math.abs(target - entry);
+  if (boardDiff < 4) {
+    angleCue = `Entry angle appears flat (ball traveled nearly straight from target to pocket). Consider opening your angle — move your feet 2–3 boards toward your ball side while keeping your target, creating more differential.`;
+  } else if (boardDiff > 12) {
+    angleCue = `Entry angle appears steep. The ball is crossing a lot of boards from target to entry. This can cause high hits or brooklyn misses. Consider closing your angle slightly — move your feet toward the outside while keeping target.`;
+  }
+
+  // Severity
+  let severity = 'minor';
+  if (missBoards >= 4 || miss === 'brooklyn') severity = 'major';
+  else if (missBoards >= 2 || shapeSeverity === 'moderate') severity = 'moderate';
+
+  // New stance and target (clamped 1–40)
+  let newStance = stance, newTarget = target;
+  if (missDir === 'left') {
+    newStance = Math.max(1, Math.min(40, stance - feetMove));
+    newTarget = Math.max(1, Math.min(40, target - targetMove));
+  } else if (missDir === 'right') {
+    newStance = Math.max(1, Math.min(40, stance + feetMove));
+    newTarget = Math.max(1, Math.min(40, target + targetMove));
+  }
+
+  const dirLabel = missDir === 'left' ? '← Left' : '→ Right';
+  const feetLabel = missDir === 'left' ? `${feetMove} boards left` : `${feetMove} boards right`;
+  const targetLabel = missDir === 'left' ? `${targetMove} board${targetMove !== 1 ? 's' : ''} left` : `${targetMove} board${targetMove !== 1 ? 's' : ''} right`;
+
+  return {
+    severity,
+    feetMove,
+    targetMove,
+    missDir,
+    dirLabel,
+    feetLabel,
+    targetLabel,
+    newStance,
+    newTarget,
+    targetDepthCue,
+    reactionNote,
+    speedNote,
+    speedCue,
+    angleCue,
+    entryError,
+    miss,
+    hand,
+    stance,
+    target,
+    entry,
+    speed,
+  };
 }
+
+/* ── Render ── */
+function render() { renderTabs(); renderContent(); }
 
 function renderTabs() {
   const tabs = document.getElementById('tabs');
   const items = [
     {id:'session', icon:'🎳', label:'Session'},
+    {id:'adjust',  icon:'🎯', label:'Adjust'},
     {id:'history', icon:'📋', label:'History'},
   ];
   tabs.innerHTML = items.map(t => `
@@ -370,18 +804,19 @@ function renderTabs() {
 function renderContent() {
   const el = document.getElementById('content');
   if (state.tab === 'session') el.innerHTML = renderSession();
+  else if (state.tab === 'adjust') el.innerHTML = renderAdjust();
   else el.innerHTML = renderHistory();
   bindEvents();
 }
 
+/* ── Session tab ── */
 function renderSession() {
-  const inner = state.sessionTab === 'setup'  ? renderSetup()
-              : state.sessionTab === 'games'  ? renderGames()
+  const inner = state.sessionTab === 'setup'   ? renderSetup()
+              : state.sessionTab === 'games'   ? renderGames()
               : renderResults();
-
   const subtabs = [
-    {id:'setup', icon:'👤', label:'Players'},
-    {id:'games', icon:'🎳', label:`Games${state.games.length?` (${state.games.length})`:''}` },
+    {id:'setup',   icon:'👤', label:'Players'},
+    {id:'games',   icon:'🎳', label:`Games${state.games.length?` (${state.games.length})`:''}`},
     {id:'results', icon:'💰', label:'Results'},
   ].map(t => `
     <button class="tab ${state.sessionTab===t.id?'active':''}" style="flex:1;font-size:0.58rem;"
@@ -389,7 +824,6 @@ function renderSession() {
       <span class="tab-icon">${t.icon}</span>${t.label}
     </button>
   `).join('');
-
   return `
     <div style="display:flex;border-bottom:1px solid #2a2a4a;margin:-20px -16px 20px;background:#0d0d1a;">
       ${subtabs}
@@ -407,9 +841,7 @@ function renderSetup() {
       ${state.players.length > 2 ? `<button class="btn-sm" onclick="delPlayer(${i})">✕</button>` : ''}
     </div>
   `).join('');
-
   const active = state.players.map(p=>p.trim()).filter(Boolean);
-
   return `
     <div class="sec-title">⚡ Players</div>
     ${rows}
@@ -452,7 +884,6 @@ function renderGames() {
       <div class="card-hint">Tap multiple players for a tie</div>
     </div>
   `).join('');
-
   return `
     <div class="sec-title">🎳 Game Results</div>
     ${gameCards}
@@ -468,15 +899,12 @@ function renderGames() {
 
 function renderResults() {
   if (!state.result) return `<div class="empty">No results yet.<br/>Add games and tap<br/>🎳 <strong>Settle Up</strong></div>`;
-
   const {bal, txs} = state.result;
   const active = state.players.map(p=>p.trim()).filter(Boolean);
-
   const balRows = active.map(n => {
     const b = bal[n] || 0;
     return `<div class="bal-row"><span>${esc(n)}</span><span class="${b>=0?'pos':'neg'}">${b>=0?'+':''}$${b.toFixed(2)}</span></div>`;
   }).join('');
-
   const txCards = txs.length === 0
     ? `<div class="all-clear">Everyone is square! 🎉</div>`
     : txs.map(tx => `
@@ -487,7 +915,6 @@ function renderResults() {
           <span class="tx-amt">$${tx.amount.toFixed(2)}</span>
         </div>
       `).join('');
-
   return `
     <div class="rename-row">
       <input class="field" id="sessionNameInput" placeholder="e.g. Friday Night Bowling"
@@ -497,23 +924,330 @@ function renderResults() {
       <button class="rename-btn" onclick="saveSession()">💾 Save</button>
     </div>
     <div id="saveError" class="error" style="display:none;margin-bottom:10px;"></div>
-
     <div class="sec-title" style="color:#f5c842;">💰 Net Balances · ${state.games.length} Game${state.games.length!==1?'s':''}</div>
     ${balRows}
-
     <div class="green-title" style="margin-top:20px;">✅ Pay Up · ${txs.length} Transaction${txs.length!==1?'s':''}</div>
     ${txCards}
-
     <div style="margin-top:24px;">
       <button class="btn btn-subtle" onclick="newSession()">🔄 New Session</button>
     </div>
   `;
 }
 
+/* ══════════════════════════════════════════════
+   ADJUST TAB RENDER
+   ══════════════════════════════════════════════ */
+function renderAdjust() {
+  const a = state.adj;
+
+  const missOptions = [
+    {id:'brooklyn',    label:'Brooklyn',      desc:'Crossed the headpin'},
+    {id:'light-left',  label:'Light left',    desc:'High on headpin'},
+    {id:'light-right', label:'Light right',   desc:'Thin on headpin'},
+    {id:'corner-left', label:'Left corner',   desc:'7-pin (RH) / 10-pin (LH)'},
+    {id:'corner-right',label:'Right corner',  desc:'10-pin (RH) / 7-pin (LH)'},
+  ];
+
+  const reactionOptions = [
+    {id:'early',  label:'Hooks early',   cls: a.reaction==='early'  ? 'active-orange' : ''},
+    {id:'normal', label:'Looks normal',  cls: a.reaction==='normal' ? 'active-green'  : ''},
+    {id:'late',   label:'Skids long',    cls: a.reaction==='late'   ? 'active-yellow' : ''},
+  ];
+
+  const resultHtml = a.result ? renderAdjResult(a.result) : '';
+
+  // Validation — sliders always have a value; use touched flags
+  const canCalc = a.stanceTouched && a.targetTouched && a.entryTouched && a.speedTouched && a.reaction && a.miss;
+
+  return `
+    <div class="sec-title">🎯 Lane Adjustment</div>
+
+    <span class="field-label">Dominant hand</span>
+    <div class="hand-toggle">
+      <button class="hand-btn ${a.hand==='right'?'active':''}" onclick="adjSet('hand','right')">⚾ Right</button>
+      <button class="hand-btn ${a.hand==='left' ?'active':''}" onclick="adjSet('hand','left')">⚾ Left</button>
+    </div>
+
+    <span class="field-label">Stance board <span style="color:#3a3a6a;font-size:0.55rem;">— sliding foot at the foul line</span></span>
+    <div class="board-slider-wrap">
+      <div class="board-slider-top">
+        <span class="board-slider-num ${!a.stance?'unset':''}" id="lbl-stance">${a.stance || '—'}</span>
+        <span class="board-slider-unit">board · 1 = right gutter&nbsp;&nbsp;39 = left gutter</span>
+      </div>
+      <div class="board-slider-track">
+        <div class="board-slider-fill" id="fill-stance" style="width:${a.stance ? ((a.stance-1)/38*100).toFixed(1) : 0}%"></div>
+      </div>
+      <input type="range" class="board-range" min="1" max="39" step="1"
+        value="${a.stance || 20}"
+        oninput="adjSlider('stance',this.value)"/>
+      <div class="board-slider-labels"><span>1</span><span>10</span><span>20</span><span>30</span><span>39</span></div>
+    </div>
+
+    <span class="field-label">Target board <span style="color:#3a3a6a;font-size:0.55rem;">— board you're playing at the arrows</span></span>
+    <div class="board-slider-wrap">
+      <div class="board-slider-top">
+        <span class="board-slider-num ${!a.target?'unset':''}" id="lbl-target">${a.target || '—'}</span>
+        <span class="board-slider-unit">board · arrows ~15 ft out</span>
+      </div>
+      <div class="board-slider-track">
+        <div class="board-slider-fill" id="fill-target" style="width:${a.target ? ((a.target-1)/38*100).toFixed(1) : 0}%"></div>
+      </div>
+      <input type="range" class="board-range" min="1" max="39" step="1"
+        value="${a.target || 10}"
+        oninput="adjSlider('target',this.value)"/>
+      <div class="board-slider-labels"><span>1</span><span>10</span><span>20</span><span>30</span><span>39</span></div>
+    </div>
+
+    <span class="field-label">Entry board <span style="color:#3a3a6a;font-size:0.55rem;">— where it's consistently hitting the pins</span></span>
+    <div class="board-slider-wrap">
+      <div class="board-slider-top">
+        <span class="board-slider-num ${!a.entry?'unset':''}" id="lbl-entry">${a.entry || '—'}</span>
+        <span class="board-slider-unit">board · pocket = 17</span>
+      </div>
+      <div class="board-slider-track">
+        <div class="board-slider-fill" id="fill-entry" style="width:${a.entry ? ((a.entry-1)/38*100).toFixed(1) : 0}%"></div>
+      </div>
+      <input type="range" class="board-range" min="1" max="39" step="1"
+        value="${a.entry || 17}"
+        oninput="adjSlider('entry',this.value)"/>
+      <div class="board-slider-labels"><span>1</span><span>10</span><span>17 ●</span><span>30</span><span>39</span></div>
+    </div>
+
+    <span class="field-label">Ball speed <span style="color:#3a3a6a;font-size:0.55rem;">— typical mph this session</span></span>
+    <div class="board-slider-wrap speed-slider-wrap">
+      <div class="board-slider-top">
+        <span class="board-slider-num speed-slider-num ${!a.speed?'unset':''}" id="lbl-speed">${a.speed ? a.speed + ' mph' : '—'}</span>
+        <span class="board-slider-unit">stroker ideal: 16–18 mph</span>
+      </div>
+      <div class="board-slider-track">
+        <div class="board-slider-fill speed-slider-fill" id="fill-speed" style="width:${a.speed ? ((a.speed-8)/17*100).toFixed(1) : 0}%"></div>
+      </div>
+      <input type="range" class="board-range speed-range" min="8" max="25" step="0.5"
+        value="${a.speed || 16}"
+        oninput="adjSlider('speed',this.value)"/>
+      <div class="board-slider-labels"><span>8</span><span>12</span><span>16</span><span>20</span><span>25</span></div>
+    </div>
+
+    <span class="field-label">Ball reaction</span>
+    <div class="chip-row">
+      ${reactionOptions.map(r => `
+        <button class="chip ${r.cls}" onclick="adjSet('reaction','${r.id}')">${r.label}</button>
+      `).join('')}
+    </div>
+
+    <span class="field-label">Consistent miss pattern</span>
+    <div class="chip-row">
+      ${missOptions.map(m => `
+        <button class="chip ${a.miss===m.id ? 'active-yellow':''}"
+          onclick="adjSet('miss','${m.id}')"
+          title="${m.desc}">${m.label}</button>
+      `).join('')}
+    </div>
+    ${a.miss ? `<div style="font-size:0.62rem;color:#4a4a8a;margin-top:-2px;margin-bottom:8px;">${missOptions.find(m=>m.id===a.miss)?.desc||''}</div>` : ''}
+
+    <div style="margin-top:20px;" class="gap-lg">
+      ${canCalc
+        ? `<button id="calc-btn" class="btn btn-blue" onclick="runAdjustment()">🎯 Calculate Adjustment</button>`
+        : `<button id="calc-btn" class="btn btn-blue" style="opacity:0.4;pointer-events:none;">Fill in all fields above</button>`
+      }
+    </div>
+
+    ${resultHtml}
+
+    <div style="margin-top:16px;">
+      <button class="btn btn-subtle" onclick="resetAdj()">↺ Reset Form</button>
+    </div>
+  `;
+}
+
+function renderAdjResult(r) {
+  const sevClass = r.severity === 'major' ? 'sev-major' : r.severity === 'moderate' ? 'sev-moderate' : 'sev-minor';
+  const sevLabel = r.severity === 'major' ? 'Major adj' : r.severity === 'moderate' ? 'Moderate' : 'Minor adj';
+
+  const noMove = r.feetMove === 0;
+
+  // Lane visualization SVG
+  // Simplified top-down lane showing boards, old line, new line
+  const laneViz = buildLaneViz(r);
+
+  return `
+    <div class="adj-result">
+      <div class="adj-result-head">
+        <span style="font-size:1.4rem;">🎯</span>
+        <span class="adj-result-title">Your Adjustment</span>
+        <span class="adj-severity ${sevClass}">${sevLabel}</span>
+      </div>
+
+      ${laneViz}
+
+      <div class="adj-block">
+        <div class="adj-block-label">Feet (stance)</div>
+        ${noMove ? `<div class="adj-move-detail">No lateral stance change needed</div>` : `
+          <div class="adj-line">
+            <span class="adj-move">${r.dirLabel}</span>
+            <span class="adj-move-detail">${r.feetMove} boards → board ${r.newStance}</span>
+          </div>
+        `}
+        <div class="adj-why">Move from board ${r.stance} to board ${r.newStance}. Your feet set the launch angle — moving them ${r.missDir} shifts your entire ball path in that direction.</div>
+      </div>
+
+      <div class="adj-block">
+        <div class="adj-block-label">Target (arrows)</div>
+        ${noMove ? `<div class="adj-move-detail">No target change needed</div>` : `
+          <div class="adj-line">
+            <span class="adj-move">${r.dirLabel}</span>
+            <span class="adj-move-detail">${r.targetMove} board${r.targetMove!==1?'s':''} → board ${r.newTarget}</span>
+          </div>
+        `}
+        <div class="adj-why">Move your target from board ${r.target} to board ${r.newTarget}. Using the 2-1 rule: feet move 2× what the target moves, both in the same direction as your miss.</div>
+      </div>
+
+      ${r.targetDepthCue ? `
+        <div class="adj-block">
+          <div class="adj-block-label">Ball shape fix</div>
+          <div class="adj-cue">${r.targetDepthCue}</div>
+        </div>
+      ` : ''}
+
+      ${r.speedCue ? `
+        <div class="adj-block">
+          <div class="adj-block-label">Speed note · ${esc(r.speedNote)}</div>
+          <div class="adj-warn">${r.speedCue}</div>
+        </div>
+      ` : ''}
+
+      ${r.angleCue ? `
+        <div class="adj-block">
+          <div class="adj-block-label">Entry angle</div>
+          <div class="adj-cue">${r.angleCue}</div>
+        </div>
+      ` : ''}
+
+      <div class="adj-block">
+        <div class="adj-block-label">Summary</div>
+        <div class="adj-cue" style="font-size:0.82rem;line-height:1.7;">
+          ${buildSummary(r)}
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function buildSummary(r) {
+  const hand = r.hand === 'right' ? 'right-handed' : 'left-handed';
+  const pocket = 17;
+  const diff = r.entry - pocket;
+  const diffDesc = r.hand === 'right'
+    ? (diff > 0 ? `${diff} board${Math.abs(diff)!==1?'s':''} right of pocket` : `${Math.abs(diff)} board${Math.abs(diff)!==1?'s':''} left of pocket`)
+    : (diff < 0 ? `${Math.abs(diff)} board${Math.abs(diff)!==1?'s':''} right of pocket` : `${diff} board${Math.abs(diff)!==1?'s':''} left of pocket`);
+
+  const missMap = {
+    brooklyn: 'going Brooklyn',
+    'light-left': 'hitting light-left',
+    'light-right': 'hitting light-right',
+    'corner-left': 'leaving the left corner pin',
+    'corner-right': 'leaving the right corner pin',
+  };
+
+  return `You're ${hand}, playing board ${r.stance} at the line, targeting board ${r.target} at the arrows, and the ball is entering at board ${r.entry} — ${diffDesc}. You're consistently ${missMap[r.miss]||'missing'}. Move your feet ${r.feetMove} boards ${r.missDir} to board ${r.newStance} and your target ${r.targetMove} board${r.targetMove!==1?'s':''} ${r.missDir} to board ${r.newTarget}.`;
+}
+
+function buildLaneViz(r) {
+  // Simplified lane top-down: foul line at top, pins at bottom
+  // Show old line (orange) and new line (green)
+  // Lane is 39 boards wide. We'll scale to fit SVG width.
+  const W = 300, H = 140;
+  const PAD = 16;
+  const laneW = W - PAD * 2;
+  const boardW = laneW / 39;
+
+  // Convert board numbers to x positions (board 1 = right for RH, left for LH)
+  // We'll display RH convention: board 1 on right, board 39 on left
+  function boardX(b) {
+    const clamped = Math.max(1, Math.min(39, b));
+    return PAD + (39 - clamped) * boardW + boardW / 2;
+  }
+
+  // Old line: stance at top (foul line), entry at bottom (pocket)
+  const oldStanceX = boardX(r.stance);
+  const oldEntryX  = boardX(r.entry);
+  // New line
+  const newStanceX = boardX(r.newStance);
+  const newEntryX  = boardX(17); // ideal pocket
+
+  // Target markers (arrows area = ~30% down)
+  const arrowY = H * 0.3;
+  const oldTargetX = boardX(r.target);
+  const newTargetX = boardX(r.newTarget);
+
+  // Pin deck line at bottom
+  const pinY = H - 18;
+  const foulY = 18;
+
+  return `
+    <div class="lane-viz">
+      <div class="lane-viz-label">Line visualization · top-down view</div>
+      <div class="lane-svg-wrap">
+        <svg width="100%" viewBox="0 0 ${W} ${H}" style="display:block;">
+          <!-- Lane background -->
+          <rect x="${PAD}" y="${foulY}" width="${laneW}" height="${pinY - foulY}" fill="#0d1208" rx="2"/>
+          <!-- Board lines every 5 boards -->
+          ${[5,10,15,20,25,30,35].map(b => {
+            const x = PAD + (39 - b) * boardW + boardW / 2;
+            return `<line x1="${x}" y1="${foulY}" x2="${x}" y2="${pinY}" stroke="#1a2a10" stroke-width="0.5"/>
+                    <text x="${x}" y="${foulY - 4}" text-anchor="middle" fill="#2a4a20" font-size="7" font-family="monospace">${b}</text>`;
+          }).join('')}
+          <!-- Arrows area line -->
+          <line x1="${PAD}" y1="${arrowY}" x2="${PAD + laneW}" y2="${arrowY}" stroke="#2a3a20" stroke-width="0.5" stroke-dasharray="3 3"/>
+          <text x="${PAD - 4}" y="${arrowY + 3}" text-anchor="end" fill="#2a4a20" font-size="7" font-family="monospace">▼</text>
+
+          <!-- Foul line label -->
+          <text x="${PAD - 4}" y="${foulY + 4}" text-anchor="end" fill="#3a3a6a" font-size="7" font-family="monospace">FL</text>
+          <!-- Pin line label -->
+          <text x="${PAD - 4}" y="${pinY + 4}" text-anchor="end" fill="#3a3a6a" font-size="7" font-family="monospace">↓</text>
+
+          <!-- Old line (orange/miss) -->
+          <line x1="${oldStanceX}" y1="${foulY}" x2="${oldTargetX}" y2="${arrowY}"
+            stroke="#e05c2a" stroke-width="1.5" stroke-dasharray="4 3" opacity="0.7"/>
+          <line x1="${oldTargetX}" y1="${arrowY}" x2="${oldEntryX}" y2="${pinY}"
+            stroke="#e05c2a" stroke-width="1.5" stroke-dasharray="4 3" opacity="0.7"/>
+          <circle cx="${oldEntryX}" cy="${pinY}" r="3" fill="#e05c2a" opacity="0.8"/>
+          <text x="${oldEntryX}" y="${pinY + 11}" text-anchor="middle" fill="#e05c2a" font-size="7" font-family="monospace">${r.entry}</text>
+
+          <!-- New line (green/target) -->
+          <line x1="${newStanceX}" y1="${foulY}" x2="${newTargetX}" y2="${arrowY}"
+            stroke="#4af04a" stroke-width="1.5" opacity="0.9"/>
+          <line x1="${newTargetX}" y1="${arrowY}" x2="${newEntryX}" y2="${pinY}"
+            stroke="#4af04a" stroke-width="1.5" opacity="0.9"/>
+          <circle cx="${newEntryX}" cy="${pinY}" r="3" fill="#4af04a" opacity="0.9"/>
+          <text x="${newEntryX}" y="${pinY + 11}" text-anchor="middle" fill="#4af04a" font-size="7" font-family="monospace">17</text>
+
+          <!-- Stance markers at foul line -->
+          <circle cx="${oldStanceX}" cy="${foulY}" r="3" fill="#e05c2a" opacity="0.7"/>
+          <circle cx="${newStanceX}" cy="${foulY}" r="3" fill="#4af04a" opacity="0.9"/>
+
+          <!-- Target markers at arrows -->
+          <rect x="${oldTargetX - 3}" y="${arrowY - 4}" width="6" height="8" rx="1" fill="#e05c2a" opacity="0.6"/>
+          <rect x="${newTargetX - 3}" y="${arrowY - 4}" width="6" height="8" rx="1" fill="#4af04a" opacity="0.8"/>
+
+          <!-- Pin deck -->
+          <line x1="${PAD}" y1="${pinY}" x2="${PAD + laneW}" y2="${pinY}" stroke="#2a4a2a" stroke-width="0.5"/>
+
+          <!-- Legend -->
+          <line x1="${W - 80}" y1="10" x2="${W - 65}" y2="10" stroke="#e05c2a" stroke-width="1.5" stroke-dasharray="4 3" opacity="0.7"/>
+          <text x="${W - 62}" y="13" fill="#e05c2a" font-size="7" font-family="monospace">current</text>
+          <line x1="${W - 80}" y1="22" x2="${W - 65}" y2="22" stroke="#4af04a" stroke-width="1.5" opacity="0.9"/>
+          <text x="${W - 62}" y="25" fill="#4af04a" font-size="7" font-family="monospace">adjusted</text>
+        </svg>
+      </div>
+    </div>
+  `;
+}
+
+/* ── History tab ── */
 function renderHistory() {
   const history = loadHistory();
   if (history.length === 0) return `<div class="empty">No saved sessions yet.<br/>Complete a game, name it,<br/>and tap 💾 Save.</div>`;
-
   return `
     <div class="sec-title">📋 Past Sessions <span style="color:#3a3a7a;font-size:0.6em;letter-spacing:0.1em;">· last 30 days</span></div>
     ${history.slice().reverse().map((s,ri) => {
@@ -521,7 +1255,6 @@ function renderHistory() {
       const expanded = state.expandedHist === i;
       const txCount = s.txs.length;
       const label = s.name || formatDate(s.date);
-
       const detail = expanded ? `
         <div class="hist-body">
           <div style="font-size:0.65rem;color:#5050a0;letter-spacing:0.1em;margin-bottom:10px;">${formatDate(s.date)}</div>
@@ -548,7 +1281,6 @@ function renderHistory() {
           </div>
         </div>
       ` : '';
-
       return `
         <div class="hist-card" onclick="toggleHist(${i})">
           <div class="hist-head">
@@ -570,43 +1302,93 @@ function renderHistory() {
   `;
 }
 
-// ── Buffered input handlers (no re-render while typing) ──────────────────────
+/* ── Adjust actions ── */
+function adjSlider(key, val) {
+  const v = parseFloat(val);
+  state.adj[key] = v;
+  state.adj[key + 'Touched'] = true;
+  state.adj.result = null;
+  // Live-update label and fill bar without full re-render
+  const lbl = document.getElementById('lbl-' + key);
+  const fill = document.getElementById('fill-' + key);
+  if (lbl) {
+    lbl.textContent = key === 'speed' ? v + ' mph' : v;
+    lbl.classList.remove('unset');
+  }
+  if (fill) {
+    const pct = key === 'speed'
+      ? ((v - 8) / 17 * 100).toFixed(1)
+      : ((v - 1) / 38 * 100).toFixed(1);
+    fill.style.width = pct + '%';
+  }
+  // Check if we can now enable the button (no re-render needed for sliders)
+  updateCalcBtn();
+}
+function updateCalcBtn() {
+  const a = state.adj;
+  const can = a.stanceTouched && a.targetTouched && a.entryTouched && a.speedTouched && a.reaction && a.miss;
+  const btn = document.getElementById('calc-btn');
+  if (btn) {
+    btn.style.opacity = can ? '1' : '0.4';
+    btn.style.pointerEvents = can ? 'auto' : 'none';
+  }
+}
+function adjSet(key, val) {
+  state.adj[key] = val;
+  state.adj.result = null;
+  render();
+  // After render, re-check button state
+  setTimeout(updateCalcBtn, 0);
+}
+function adjSetVal(key, val) {
+  state.adj[key] = val;
+  state.adj.result = null;
+  // Debounce re-render for number inputs
+  clearTimeout(inputTimers['adj_' + key]);
+  inputTimers['adj_' + key] = setTimeout(() => { render(); }, 400);
+}
+function runAdjustment() {
+  const a = state.adj;
+  if (!a.stance || !a.target || !a.entry || !a.speed || !a.reaction || !a.miss) return;
+  state.adj.result = computeAdjustment(a);
+  render();
+  // Scroll to result
+  setTimeout(() => {
+    const el = document.querySelector('.adj-result');
+    if (el) el.scrollIntoView({behavior:'smooth', block:'start'});
+  }, 100);
+}
+function resetAdj() {
+  state.adj = { hand: state.adj.hand, stance:'', target:'', entry:'', speed:'',
+    stanceTouched:false, targetTouched:false, entryTouched:false, speedTouched:false,
+    reaction:'', miss:'', result:null };
+  render();
+}
+
+/* ── Session actions ── */
 function bufferPlayer(i, val) {
   state.players[i] = val;
-  // Only re-render after user stops typing for 600ms
   clearTimeout(inputTimers['player_' + i]);
   inputTimers['player_' + i] = setTimeout(() => {
     state.result = null;
     render();
-    // Restore focus to the same input
     const el = document.getElementById('player-input-' + i);
     if (el) { el.focus(); el.setSelectionRange(el.value.length, el.value.length); }
   }, 600);
 }
+function bufferSessionName(val) { state.sessionName = val; }
 
-function bufferSessionName(val) {
-  state.sessionName = val;
-  // No re-render needed for session name — it's read on save
-}
-
-// ── Actions ──────────────────────────────────────────────────────────────────
 function switchTab(t) { state.tab = t; state.expandedHist = null; render(); }
 function switchSessionTab(t) {
-  // Flush any pending player input before switching tabs
-  Object.keys(inputTimers).forEach(k => {
-    clearTimeout(inputTimers[k]);
-    delete inputTimers[k];
-  });
+  Object.keys(inputTimers).forEach(k => { clearTimeout(inputTimers[k]); delete inputTimers[k]; });
   state.sessionTab = t;
   render();
 }
 
-function updatePlayer(i, v) { state.players[i] = v; state.result = null; render(); }
 function addPlayer() {
   if (state.players.length < 4) {
     state.players.push('');
     render();
-    // Focus the new input
     setTimeout(() => {
       const el = document.getElementById('player-input-' + (state.players.length - 1));
       if (el) el.focus();
@@ -615,28 +1397,19 @@ function addPlayer() {
 }
 function delPlayer(i) {
   if (state.players.length <= 2) return;
-  state.players.splice(i,1);
-  state.games=[];
-  state.result=null;
-  render();
+  state.players.splice(i,1); state.games=[]; state.result=null; render();
 }
-
 function addGame() {
   const active = state.players.map(p=>p.trim()).filter(Boolean);
   if (active.length < 2) return;
-  state.games.push({ winners: [] });
-  state.result = null;
-  render();
+  state.games.push({ winners: [] }); state.result = null; render();
 }
 function toggleWinner(gi, player) {
   const w = state.games[gi].winners;
   const idx = w.indexOf(player);
-  if (idx === -1) w.push(player);
-  else w.splice(idx, 1);
-  state.result = null;
-  render();
+  if (idx === -1) w.push(player); else w.splice(idx, 1);
+  state.result = null; render();
 }
-
 function delGame(i) { state.games.splice(i,1); state.result=null; render(); }
 
 function calculate() {
@@ -657,7 +1430,6 @@ function calculate() {
 
 function saveSession() {
   if (!state.result) return;
-  // Read directly from input in case bufferSessionName hasn't synced
   const input = document.getElementById('sessionNameInput');
   if (input) state.sessionName = input.value;
   const name = state.sessionName.trim();
@@ -668,54 +1440,34 @@ function saveSession() {
   }
   const active = state.players.map(p=>p.trim()).filter(Boolean);
   let history = loadHistory();
-  const cutoff = new Date();
-  cutoff.setDate(cutoff.getDate() - 30);
+  const cutoff = new Date(); cutoff.setDate(cutoff.getDate() - 30);
   history = history.filter(s => new Date(s.date) >= cutoff);
-  history.push({
-    date: todayISO(),
-    name,
-    players: active,
-    games: state.games.length,
-    bal: state.result.bal,
-    txs: state.result.txs,
-  });
+  history.push({ date: todayISO(), name, players: active, games: state.games.length, bal: state.result.bal, txs: state.result.txs });
   saveHistory(history);
   const btn = document.querySelector('.rename-btn');
   if (btn) { btn.textContent = '✅ Saved!'; setTimeout(()=>{ btn.textContent = '💾 Save'; }, 1500); }
 }
-
 function showSaveError(msg) {
   const el = document.getElementById('saveError');
   if (el) { el.textContent = msg; el.style.display = 'block'; setTimeout(()=>{ el.style.display='none'; }, 2500); }
 }
-
 function newSession() {
   const saved = loadSavedPlayers();
   state.players = saved && saved.length >= 2 ? [...saved] : ['','',''];
-  state.games = [];
-  state.result = null;
-  state.sessionName = '';
-  state.error = '';
-  state.sessionTab = 'setup';
+  state.games=[]; state.result=null; state.sessionName=''; state.error=''; state.sessionTab='setup';
   render();
 }
-
 function toggleHist(i) { state.expandedHist = state.expandedHist === i ? null : i; render(); }
-
 function deleteSession(i, e) {
   e.stopPropagation();
-  const history = loadHistory();
-  history.splice(i, 1);
-  saveHistory(history);
-  state.expandedHist = null;
-  render();
+  const history = loadHistory(); history.splice(i,1); saveHistory(history);
+  state.expandedHist = null; render();
 }
 
 function esc(str) {
   if (!str) return '';
   return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
-
 function bindEvents() {}
 
 const _savedPlayers = loadSavedPlayers();
