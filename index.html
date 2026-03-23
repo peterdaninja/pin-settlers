@@ -393,14 +393,7 @@ select.field {
   transition: width 0.05s;
   opacity: 0.6;
 }
-.board-slider-labels {
-  display: flex;
-  justify-content: space-between;
-  font-size: 0.55rem;
-  color: #3a3a6a;
-  letter-spacing: 0.05em;
-  margin-top: 2px;
-}
+
 input[type=range].board-range {
   width: 100%;
   height: 28px;
@@ -445,6 +438,34 @@ input[type=range].speed-range::-moz-range-thumb { background: var(--blue); }
 .speed-slider-num { color: var(--blue) !important; text-shadow: 0 0 8px #4ab8f060 !important; }
 .speed-slider-fill { background: var(--blue) !important; }
 .speed-slider-wrap:focus-within { border-color: var(--blue) !important; }
+
+/* Arrow board tick marks */
+.board-slider-labels {
+  position: relative;
+  height: 20px;
+  margin-top: 4px;
+}
+.speed-slider-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.52rem;
+  color: #3a3a6a;
+  margin-top: 4px;
+  letter-spacing: 0.03em;
+}
+.arrow-tick {
+  position: absolute;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  pointer-events: none;
+}
+.arrow-tick-line { width: 1px; height: 5px; background: #3a3a6a; }
+.arrow-tick-label { font-size: 0.52rem; color: #3a3a6a; letter-spacing: 0.03em; line-height: 1; }
+.arrow-tick.pocket .arrow-tick-line { background: #f5c84270; height: 7px; }
+.arrow-tick.pocket .arrow-tick-label { color: #f5c84270; }
 
 /* Result output panel */
 .adj-result {
@@ -980,7 +1001,15 @@ function renderAdjust() {
       <input type="range" class="board-range" min="1" max="39" step="1"
         value="${a.stance || 20}"
         oninput="adjSlider('stance',this.value)"/>
-      <div class="board-slider-labels"><span>1</span><span>10</span><span>20</span><span>30</span><span>39</span></div>
+      <div class="board-slider-labels">
+      <div class="arrow-tick" style="left:10.53%"><div class="arrow-tick-line"></div><div class="arrow-tick-label">5</div></div>
+      <div class="arrow-tick" style="left:23.68%"><div class="arrow-tick-line"></div><div class="arrow-tick-label">10</div></div>
+      <div class="arrow-tick" style="left:36.84%"><div class="arrow-tick-line"></div><div class="arrow-tick-label">15</div></div>
+      <div class="arrow-tick" style="left:50.00%"><div class="arrow-tick-line"></div><div class="arrow-tick-label">20</div></div>
+      <div class="arrow-tick" style="left:63.16%"><div class="arrow-tick-line"></div><div class="arrow-tick-label">25</div></div>
+      <div class="arrow-tick" style="left:76.32%"><div class="arrow-tick-line"></div><div class="arrow-tick-label">30</div></div>
+      <div class="arrow-tick" style="left:89.47%"><div class="arrow-tick-line"></div><div class="arrow-tick-label">35</div></div>
+    </div>
     </div>
 
     <span class="field-label">Target board <span style="color:#3a3a6a;font-size:0.55rem;">— board you're playing at the arrows</span></span>
@@ -995,7 +1024,15 @@ function renderAdjust() {
       <input type="range" class="board-range" min="1" max="39" step="1"
         value="${a.target || 10}"
         oninput="adjSlider('target',this.value)"/>
-      <div class="board-slider-labels"><span>1</span><span>10</span><span>20</span><span>30</span><span>39</span></div>
+      <div class="board-slider-labels">
+      <div class="arrow-tick" style="left:10.53%"><div class="arrow-tick-line"></div><div class="arrow-tick-label">5</div></div>
+      <div class="arrow-tick" style="left:23.68%"><div class="arrow-tick-line"></div><div class="arrow-tick-label">10</div></div>
+      <div class="arrow-tick" style="left:36.84%"><div class="arrow-tick-line"></div><div class="arrow-tick-label">15</div></div>
+      <div class="arrow-tick" style="left:50.00%"><div class="arrow-tick-line"></div><div class="arrow-tick-label">20</div></div>
+      <div class="arrow-tick" style="left:63.16%"><div class="arrow-tick-line"></div><div class="arrow-tick-label">25</div></div>
+      <div class="arrow-tick" style="left:76.32%"><div class="arrow-tick-line"></div><div class="arrow-tick-label">30</div></div>
+      <div class="arrow-tick" style="left:89.47%"><div class="arrow-tick-line"></div><div class="arrow-tick-label">35</div></div>
+    </div>
     </div>
 
     <span class="field-label">Entry board <span style="color:#3a3a6a;font-size:0.55rem;">— where it's consistently hitting the pins</span></span>
@@ -1010,7 +1047,16 @@ function renderAdjust() {
       <input type="range" class="board-range" min="1" max="39" step="1"
         value="${a.entry || 17}"
         oninput="adjSlider('entry',this.value)"/>
-      <div class="board-slider-labels"><span>1</span><span>10</span><span>17 ●</span><span>30</span><span>39</span></div>
+      <div class="board-slider-labels">
+      <div class="arrow-tick" style="left:10.53%"><div class="arrow-tick-line"></div><div class="arrow-tick-label">5</div></div>
+      <div class="arrow-tick" style="left:23.68%"><div class="arrow-tick-line"></div><div class="arrow-tick-label">10</div></div>
+      <div class="arrow-tick" style="left:36.84%"><div class="arrow-tick-line"></div><div class="arrow-tick-label">15</div></div>
+      <div class="arrow-tick pocket" style="left:42.11%"><div class="arrow-tick-line"></div><div class="arrow-tick-label">17●</div></div>
+      <div class="arrow-tick" style="left:50.00%"><div class="arrow-tick-line"></div><div class="arrow-tick-label">20</div></div>
+      <div class="arrow-tick" style="left:63.16%"><div class="arrow-tick-line"></div><div class="arrow-tick-label">25</div></div>
+      <div class="arrow-tick" style="left:76.32%"><div class="arrow-tick-line"></div><div class="arrow-tick-label">30</div></div>
+      <div class="arrow-tick" style="left:89.47%"><div class="arrow-tick-line"></div><div class="arrow-tick-label">35</div></div>
+    </div>
     </div>
 
     <span class="field-label">Ball speed <span style="color:#3a3a6a;font-size:0.55rem;">— typical mph this session</span></span>
@@ -1025,7 +1071,7 @@ function renderAdjust() {
       <input type="range" class="board-range speed-range" min="8" max="25" step="0.5"
         value="${a.speed || 16}"
         oninput="adjSlider('speed',this.value)"/>
-      <div class="board-slider-labels"><span>8</span><span>12</span><span>16</span><span>20</span><span>25</span></div>
+      <div class="speed-slider-labels"><span>8</span><span>12</span><span>16</span><span>20</span><span>25</span></div>
     </div>
 
     <span class="field-label">Ball reaction</span>
