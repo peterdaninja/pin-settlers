@@ -591,13 +591,10 @@ let state = {
   expandedHist: null,
   adj: {
     hand: 'right',
-    stance: '',
-    target: '',
-    entry: '',
-    speed: '',
-    reaction: '',   // 'early' | 'normal' | 'late'
-    miss: '',       // 'brooklyn' | 'light-left' | 'light-right' | 'corner-left' | 'corner-right'
-    result: null,
+    stance: '', target: '', breakpoint: '', entry: '', speed: '',
+    stanceTouched: false, targetTouched: false, breakpointTouched: false,
+    entryTouched: false, speedTouched: false,
+    reaction: '', miss: '', result: null,
   },
 };
 
@@ -655,153 +652,171 @@ function formatDate(iso) {
 function todayISO() { return new Date().toISOString().split('T')[0]; }
 
 /* ══════════════════════════════════════════════
-   ADJUSTMENT ENGINE
+   ADJUSTMENT ENGINE  — v2
    ══════════════════════════════════════════════ */
 function computeAdjustment(adj) {
-  const hand = adj.hand;
-  const stance = parseInt(adj.stance);
-  const target = parseInt(adj.target);
-  const entry  = parseInt(adj.entry);
-  const speed  = parseFloat(adj.speed);
-  const reaction = adj.reaction;
-  const miss = adj.miss;
+  const hand       = adj.hand;
+  const stance     = parseInt(adj.stance);
+  const target     = parseInt(adj.target);
+  const breakpt    = parseInt(adj.breakpoint);  // board where ball transitions to hook
+  const entry      = parseInt(adj.entry);
+  const speed      = parseFloat(adj.speed);
+  const reaction   = adj.reaction;
+  const miss       = adj.miss;
 
-  // Pocket board: 17 for right-handed, 17 for left (mirrored, same number on their side)
-  // For RH: higher board # = further left (toward gutter on left)
-  // Board 17 = ideal entry for both hands on their respective sides
-  const POCKET = 17;
+  const POCKET     = 17;   // ideal entry board (both hands, own side)
+  const IDEAL_BP_RH = 10;  // ideal breakpoint for RH stroker (board ~8-12 is typical)
+  const IDEAL_BP_LH = 10;
 
-  // Entry error: positive = hitting too far right (thin/light), negative = too far left (high/brooklyn)
-  // RH: if entry < 17, hitting left (high/brooklyn); if entry > 17, hitting right (thin)
-  // LH: mirrored
-  let entryError = 0;
-  if (hand === 'right') {
-    entryError = entry - POCKET; // positive = right of pocket (light/thin), negative = left (high)
-  } else {
-    entryError = POCKET - entry; // mirrored for lefty
+  // ── Step 1: Diagnose ball SHAPE (motion problem vs line problem) ──
+  // Compare actual breakpoint to ideal. This tells us if the miss is
+  // caused by the line itself or by too much / too little motion.
+  const idealBP = hand === 'right' ? IDEAL_BP_RH : IDEAL_BP_LH;
+  // For RH: breakpoint should be inside (low board #). If BP is too high (outside),
+  // ball is hooking early. If BP is too low, ball is skidding.
+  // "Early hook": breakpoint is more outside than expected (higher board # for RH)
+  // "Late/skid":  breakpoint is more inside than expected (lower board # for RH)
+  let bpDelta = 0; // positive = hooking earlier (BP is farther outside than ideal)
+  if (hand === 'right') bpDelta = breakpt - idealBP;  // positive = outside = early hook
+  else                  bpDelta = idealBP - breakpt;
+
+  // Override reaction with breakpoint data if breakpoint is available
+  // bpDelta > 3  → hooking too early regardless of what player selected
+  // bpDelta < -3 → skidding too long
+  let effectiveReaction = reaction;
+  if (bpDelta > 3)  effectiveReaction = 'early';
+  if (bpDelta < -3) effectiveReaction = 'late';
+
+  // ── Step 2: Is this primarily a SHAPE problem or a LINE problem? ──
+  // If the ball is hooking very early (BP >> ideal), the miss is mostly
+  // a motion issue — a big lateral move would just relocate the problem.
+  // Flag: shape_dominant = true means the fix is primarily depth/speed, not boards.
+  const shapeDominant = Math.abs(bpDelta) > 5 && effectiveReaction !== 'normal';
+
+  // ── Step 3: Size the lateral move from MISS PATTERN only ──
+  // Miss pattern is the ground truth — not entry board arithmetic.
+  // Sizes are conservative: we'd rather under-adjust and go again.
+  //
+  //  light miss  (1-3 boards off)   → 1-2 board move
+  //  moderate miss (3-5 boards off) → 2-3 board move
+  //  strong miss (5+ boards off)    → 3-4 board move
+  //  brooklyn                       → 3-5 board move (needs real correction)
+  //  corner pin                     → 1-2 board move (usually an angle issue)
+
+  // Estimate actual miss magnitude from entry vs pocket
+  // But cap it — we trust the miss label more than the raw number
+  const rawErr = hand === 'right' ? Math.abs(entry - POCKET) : Math.abs(POCKET - entry);
+
+  let missBoards = 0;
+  let missDir    = '';  // 'left' | 'right' from the bowler's perspective
+
+  // For RH: moving LEFT means lower board numbers (toward 1, right gutter)
+  //         moving RIGHT means higher board numbers (toward 39, left side)
+  // "Move left" = open up the angle (toward the outside)
+  // "Move right" = close the angle (toward the inside)
+
+  switch (miss) {
+    case 'brooklyn':
+      // Ball crossed nose and went left of headpin for RH
+      // Need to move RIGHT (open toward outside) — but not drastically
+      missBoards = Math.min(5, Math.max(3, Math.round(rawErr * 0.5)));
+      missDir = hand === 'right' ? 'right' : 'left';
+      break;
+    case 'light-left':
+      // High on headpin, slightly left — move RIGHT (open up a touch)
+      missBoards = rawErr <= 2 ? 1 : rawErr <= 4 ? 2 : 3;
+      missDir = hand === 'right' ? 'right' : 'left';
+      break;
+    case 'light-right':
+      // Thin on headpin, right side — move LEFT (close up a touch)
+      missBoards = rawErr <= 2 ? 1 : rawErr <= 4 ? 2 : 3;
+      missDir = hand === 'right' ? 'left' : 'right';
+      break;
+    case 'corner-left':
+      // 7-pin (RH) — ball going high and crossing — move RIGHT slightly
+      // Often an angle/speed issue more than a line issue
+      missBoards = 1;
+      missDir = hand === 'right' ? 'right' : 'left';
+      break;
+    case 'corner-right':
+      // 10-pin (RH) — ball coming in flat/thin — move LEFT slightly
+      missBoards = 1;
+      missDir = hand === 'right' ? 'left' : 'right';
+      break;
   }
 
-  // Miss category analysis
-  // brooklyn = went all the way left past headpin (RH) or right (LH) — entryError strongly negative
-  // light-left = hit too far left, light (RH: high on headpin)
-  // light-right = hit too far right, thin (RH)
-  // corner-left = left corner pin (7 for RH) — ball crossed too far in
-  // corner-right = right corner pin (10 for RH) — ball too far right/flat angle
+  // If shape is the dominant problem, cut the lateral move in half —
+  // fixing the motion (speed/depth) will move the ball more than moving boards will.
+  if (shapeDominant) missBoards = Math.max(1, Math.round(missBoards / 2));
 
-  let missBoards = 0; // how many boards to move
-  let missDir = ''; // 'left' or 'right' (in terms of feet/target movement)
+  // ── Step 4: Apply 2-1 rule ──
+  // Feet move 2 boards for every 1 board the target moves, SAME direction.
+  // This preserves the ball's path angle while shifting the line.
+  const feetMove   = missBoards * 2;
+  const targetMove = missBoards;
 
-  if (miss === 'brooklyn') {
-    // Crossed headpin, went left — need to move right (for RH: move feet right, target right)
-    missBoards = hand === 'right' ? Math.max(3, Math.abs(entryError)) : Math.max(3, Math.abs(entryError));
-    missDir = hand === 'right' ? 'right' : 'left';
-  } else if (miss === 'light-left') {
-    // High on headpin / left side — move slightly right
-    missBoards = Math.max(1, Math.round(Math.abs(entryError) * 0.7));
-    missDir = hand === 'right' ? 'right' : 'left';
-  } else if (miss === 'light-right') {
-    // Thin on headpin / right side — move left
-    missBoards = Math.max(1, Math.round(Math.abs(entryError) * 0.7));
-    missDir = hand === 'right' ? 'left' : 'right';
-  } else if (miss === 'corner-left') {
-    // 7-pin for RH — ball went high/crossing, flat angle or too much hook
-    missBoards = 2;
-    missDir = hand === 'right' ? 'right' : 'left';
-  } else if (miss === 'corner-right') {
-    // 10-pin for RH — thin hit, need to move inside
-    missBoards = 2;
-    missDir = hand === 'right' ? 'left' : 'right';
-  }
-
-  // 2-1 rule: feet move 2x what target moves, same direction
-  let feetMove = missBoards * 2;
-  let targetMove = missBoards;
-
-  // Ball reaction modifier
-  // If hooking early: ball runs out of energy — target adjustment must compensate
-  let reactionNote = '';
-  let targetDepthCue = '';
-  let shapeSeverity = '';
-
-  if (reaction === 'early') {
-    // Ball hooking too early = losing angle at breakpoint
-    // Move target deeper (toward pins) by 1-2 boards AND reduce feet adjustment slightly
-    targetDepthCue = `Also move your target 1–2 boards deeper (farther down the lane toward the pins). The ball is hooking before the breakpoint, burning up energy early — a deeper target gives it more room to travel before it turns.`;
-    reactionNote = 'Early hook detected';
-    shapeSeverity = 'moderate';
-  } else if (reaction === 'late') {
-    // Ball skidding too long = not enough friction, angle is flat
-    targetDepthCue = `Also move your target 1–2 boards shallower (closer to the foul line). The ball is skidding past the breakpoint and arriving flat — a shallower target lets it pick up friction sooner and create a better angle.`;
-    reactionNote = 'Late/skid detected';
-    shapeSeverity = 'moderate';
-  }
-
-  // Speed analysis
-  // Ideal stroker speed: ~16–18 mph. Below 15 = too slow (hooks too much), above 19 = too fast (skids)
-  let speedNote = '';
-  let speedCue = '';
-  const SPEED_LOW = 15, SPEED_HIGH = 19;
-  if (speed && speed < SPEED_LOW) {
-    speedNote = `Speed low (${speed} mph)`;
-    speedCue = `Your ball speed is on the slower side. This amplifies hook and can cause the ball to burn up early or drive through the nose. Try releasing 1–2 mph faster by pushing the ball out more on the pushaway, or shortening your backswing slightly.`;
-  } else if (speed && speed > SPEED_HIGH) {
-    speedNote = `Speed high (${speed} mph)`;
-    speedCue = `Your ball speed is higher than typical for a stroker. The ball may be skidding too far and arriving with a flat angle. Try slowing your approach pace or letting the ball swing more freely rather than muscling it through.`;
-  }
-
-  // Entry angle diagnosis
-  // We estimate angle from the differential between target board and entry board
-  // Ideal entry angle ~4–5° for stroker. Rough proxy: (target - entry) differential
-  // The bigger the board differential between target and entry, the steeper the angle
-  let angleCue = '';
-  const boardDiff = Math.abs(target - entry);
-  if (boardDiff < 4) {
-    angleCue = `Entry angle appears flat (ball traveled nearly straight from target to pocket). Consider opening your angle — move your feet 2–3 boards toward your ball side while keeping your target, creating more differential.`;
-  } else if (boardDiff > 12) {
-    angleCue = `Entry angle appears steep. The ball is crossing a lot of boards from target to entry. This can cause high hits or brooklyn misses. Consider closing your angle slightly — move your feet toward the outside while keeping target.`;
-  }
-
-  // Severity
-  let severity = 'minor';
-  if (missBoards >= 4 || miss === 'brooklyn') severity = 'major';
-  else if (missBoards >= 2 || shapeSeverity === 'moderate') severity = 'moderate';
-
-  // New stance and target (clamped 1–40)
+  // New positions (clamp 1–39)
   let newStance = stance, newTarget = target;
   if (missDir === 'left') {
-    newStance = Math.max(1, Math.min(40, stance - feetMove));
-    newTarget = Math.max(1, Math.min(40, target - targetMove));
+    newStance = Math.max(1, Math.min(39, stance - feetMove));
+    newTarget = Math.max(1, Math.min(39, target - targetMove));
   } else if (missDir === 'right') {
-    newStance = Math.max(1, Math.min(40, stance + feetMove));
-    newTarget = Math.max(1, Math.min(40, target + targetMove));
+    newStance = Math.max(1, Math.min(39, stance + feetMove));
+    newTarget = Math.max(1, Math.min(39, target + targetMove));
   }
 
-  const dirLabel = missDir === 'left' ? '← Left' : '→ Right';
-  const feetLabel = missDir === 'left' ? `${feetMove} boards left` : `${feetMove} boards right`;
-  const targetLabel = missDir === 'left' ? `${targetMove} board${targetMove !== 1 ? 's' : ''} left` : `${targetMove} board${targetMove !== 1 ? 's' : ''} right`;
+  // ── Step 5: Shape fix cue ──
+  let targetDepthCue = '';
+  if (effectiveReaction === 'early' || bpDelta > 3) {
+    const bpDesc = bpDelta > 3
+      ? `Your breakpoint is on board ${breakpt} — that's farther outside than ideal (board ~${idealBP}), meaning the ball is transitioning too early.`
+      : 'The ball is picking up friction and transitioning to hook before the ideal breakpoint.';
+    targetDepthCue = `${bpDesc} Move your target 1–2 boards deeper (farther down the lane) to push the breakpoint further in. If the problem persists, a small speed increase (0.5–1 mph) will also help the ball carry through the heads longer.`;
+  } else if (effectiveReaction === 'late' || bpDelta < -3) {
+    const bpDesc = bpDelta < -3
+      ? `Your breakpoint is on board ${breakpt} — that's further inside than ideal (board ~${idealBP}), meaning the ball is skidding too far before transitioning.`
+      : 'The ball is skidding through the breakpoint and arriving at the pocket with a flatter angle than ideal.';
+    targetDepthCue = `${bpDesc} Move your target 1–2 boards shallower (closer to the foul line) so the ball picks up friction sooner. Slowing down 0.5–1 mph can also help it transition earlier.`;
+  }
+
+  // ── Step 6: Speed cue ──
+  // Stroker ideal range 15–18 mph. Note if outside, but don't let speed
+  // drive a lateral board recommendation — it's a separate fix.
+  let speedNote = '', speedCue = '';
+  if (speed < 15) {
+    speedNote = `Low speed (${speed} mph)`;
+    speedCue  = `At ${speed} mph you're below the typical stroker range (15–18 mph). Slow speed amplifies hook and can make the ball drive high through the nose or burn up before the pocket. Focus on a smooth, tension-free swing and let gravity do the work — don't muscle it. Even 1–2 extra mph from a longer backswing will create a more consistent ball motion.`;
+  } else if (speed > 18) {
+    speedNote = `High speed (${speed} mph)`;
+    speedCue  = `At ${speed} mph you're above the typical stroker range (15–18 mph). The ball may be skidding too long, arriving flat, and deflecting through the pins without carrying. Try a slightly shorter backswing or slower approach tempo — you want the ball rolling before it hits the pins.`;
+  }
+
+  // ── Step 7: Entry angle note ──
+  // Angle = how many boards the ball crossed from target to entry.
+  // For a stroker, ~6–10 boards of crossing (target to entry) is healthy.
+  let angleCue = '';
+  const crossing = hand === 'right' ? (entry - target) : (target - entry);
+  // crossing > 0 means the ball hooked (moved toward pocket from target) — normal
+  // crossing < 0 means the ball went away from pocket — unusual
+  if (crossing < 3) {
+    angleCue = `The ball crossed only ${crossing} boards from your target to entry — that's a very flat angle. Ideal stroker entry is 3–6° which typically means 6–10 boards of crossing. Consider moving your feet 2–3 boards toward the outside (keeping your target) to create more board differential and a stronger entry angle.`;
+  } else if (crossing > 14) {
+    angleCue = `The ball crossed ${crossing} boards from target to entry — that's a steep angle. Too much crossing can cause high flush hits or leave corner pins. Consider closing your angle slightly by moving your feet a few boards toward the inside while keeping your target.`;
+  }
+
+  // ── Step 8: Severity ──
+  let severity = 'minor';
+  if (miss === 'brooklyn' || feetMove >= 6) severity = 'major';
+  else if (feetMove >= 4 || shapeDominant) severity = 'moderate';
+
+  const dirLabel = missDir === 'left' ? '← Left' : missDir === 'right' ? '→ Right' : '—';
 
   return {
-    severity,
-    feetMove,
-    targetMove,
-    missDir,
-    dirLabel,
-    feetLabel,
-    targetLabel,
-    newStance,
-    newTarget,
-    targetDepthCue,
-    reactionNote,
-    speedNote,
-    speedCue,
-    angleCue,
-    entryError,
-    miss,
-    hand,
-    stance,
-    target,
-    entry,
-    speed,
+    severity, feetMove, targetMove, missDir, dirLabel,
+    newStance, newTarget,
+    targetDepthCue, speedNote, speedCue, angleCue,
+    effectiveReaction, bpDelta, shapeDominant, crossing,
+    miss, hand, stance, target, breakpt, entry, speed,
   };
 }
 
@@ -978,7 +993,7 @@ function renderAdjust() {
   const resultHtml = a.result ? renderAdjResult(a.result) : '';
 
   // Validation — sliders always have a value; use touched flags
-  const canCalc = a.stanceTouched && a.targetTouched && a.entryTouched && a.speedTouched && a.reaction && a.miss;
+  const canCalc = a.stanceTouched && a.targetTouched && a.breakpointTouched && a.entryTouched && a.speedTouched && a.reaction && a.miss;
 
   return `
     <div class="sec-title">🎯 Lane Adjustment</div>
@@ -1024,6 +1039,29 @@ function renderAdjust() {
       <input type="range" class="board-range" min="1" max="39" step="1"
         value="${a.target || 10}"
         oninput="adjSlider('target',this.value)"/>
+      <div class="board-slider-labels">
+      <div class="arrow-tick" style="left:10.53%"><div class="arrow-tick-line"></div><div class="arrow-tick-label">5</div></div>
+      <div class="arrow-tick" style="left:23.68%"><div class="arrow-tick-line"></div><div class="arrow-tick-label">10</div></div>
+      <div class="arrow-tick" style="left:36.84%"><div class="arrow-tick-line"></div><div class="arrow-tick-label">15</div></div>
+      <div class="arrow-tick" style="left:50.00%"><div class="arrow-tick-line"></div><div class="arrow-tick-label">20</div></div>
+      <div class="arrow-tick" style="left:63.16%"><div class="arrow-tick-line"></div><div class="arrow-tick-label">25</div></div>
+      <div class="arrow-tick" style="left:76.32%"><div class="arrow-tick-line"></div><div class="arrow-tick-label">30</div></div>
+      <div class="arrow-tick" style="left:89.47%"><div class="arrow-tick-line"></div><div class="arrow-tick-label">35</div></div>
+    </div>
+    </div>
+
+    <span class="field-label">Breakpoint board <span style="color:#3a3a6a;font-size:0.55rem;">— where the ball transitions from skid to hook</span></span>
+    <div class="board-slider-wrap">
+      <div class="board-slider-top">
+        <span class="board-slider-num ${!a.breakpoint?'unset':''}" id="lbl-breakpoint">${a.breakpoint || '—'}</span>
+        <span class="board-slider-unit">board · stroker ideal ≈ 8–12</span>
+      </div>
+      <div class="board-slider-track">
+        <div class="board-slider-fill" id="fill-breakpoint" style="width:${a.breakpoint ? ((a.breakpoint-1)/38*100).toFixed(1) : 0}%"></div>
+      </div>
+      <input type="range" class="board-range" min="1" max="39" step="1"
+        value="${a.breakpoint || 10}"
+        oninput="adjSlider('breakpoint',this.value)"/>
       <div class="board-slider-labels">
       <div class="arrow-tick" style="left:10.53%"><div class="arrow-tick-line"></div><div class="arrow-tick-label">5</div></div>
       <div class="arrow-tick" style="left:23.68%"><div class="arrow-tick-line"></div><div class="arrow-tick-label">10</div></div>
@@ -1182,108 +1220,291 @@ function renderAdjResult(r) {
 function buildSummary(r) {
   const hand = r.hand === 'right' ? 'right-handed' : 'left-handed';
   const pocket = 17;
-  const diff = r.entry - pocket;
-  const diffDesc = r.hand === 'right'
-    ? (diff > 0 ? `${diff} board${Math.abs(diff)!==1?'s':''} right of pocket` : `${Math.abs(diff)} board${Math.abs(diff)!==1?'s':''} left of pocket`)
-    : (diff < 0 ? `${Math.abs(diff)} board${Math.abs(diff)!==1?'s':''} right of pocket` : `${diff} board${Math.abs(diff)!==1?'s':''} left of pocket`);
-
+  const diff = r.hand === 'right' ? (r.entry - pocket) : (pocket - r.entry);
+  const diffDesc = diff === 0 ? 'hitting the pocket' :
+    diff > 0 ? `${diff} board${diff!==1?'s':''} light` :
+               `${Math.abs(diff)} board${Math.abs(diff)!==1?'s':''} high`;
   const missMap = {
     brooklyn: 'going Brooklyn',
-    'light-left': 'hitting light-left',
-    'light-right': 'hitting light-right',
+    'light-left': 'hitting light on the left',
+    'light-right': 'hitting light on the right',
     'corner-left': 'leaving the left corner pin',
     'corner-right': 'leaving the right corner pin',
   };
-
-  return `You're ${hand}, playing board ${r.stance} at the line, targeting board ${r.target} at the arrows, and the ball is entering at board ${r.entry} — ${diffDesc}. You're consistently ${missMap[r.miss]||'missing'}. Move your feet ${r.feetMove} boards ${r.missDir} to board ${r.newStance} and your target ${r.targetMove} board${r.targetMove!==1?'s':''} ${r.missDir} to board ${r.newTarget}.`;
+  const bpNote = r.bpDelta > 3 ? ` The breakpoint (board ${r.breakpt}) is earlier than ideal — ball is over-hooking.`
+               : r.bpDelta < -3 ? ` The breakpoint (board ${r.breakpt}) is later than ideal — ball is skidding through.`
+               : ` Breakpoint on board ${r.breakpt} looks reasonable.`;
+  const noMove = r.feetMove === 0;
+  const moveDesc = noMove
+    ? 'No lateral move needed — focus on the ball motion fix above.'
+    : `Move your feet ${r.feetMove} boards ${r.missDir} to board ${r.newStance} and your target ${r.targetMove} board${r.targetMove!==1?'s':''} ${r.missDir} to board ${r.newTarget}.`;
+  return `You're ${hand}, standing on board ${r.stance}, targeting board ${r.target} at the arrows. The ball is breaking on board ${r.breakpt} and entering at board ${r.entry} — ${diffDesc}. You're consistently ${missMap[r.miss]||'missing'}.${bpNote} ${moveDesc}`;
 }
 
 function buildLaneViz(r) {
-  // Simplified lane top-down: foul line at top, pins at bottom
-  // Show old line (orange) and new line (green)
-  // Lane is 39 boards wide. We'll scale to fit SVG width.
-  const W = 300, H = 140;
-  const PAD = 16;
-  const laneW = W - PAD * 2;
-  const boardW = laneW / 39;
+  // Vertical lane: foul line at top, pins at bottom
+  // Lane occupies center column; board labels on left; legend on right
+  // SVG viewBox: 260 wide x 520 tall
+  const SVG_W = 260, SVG_H = 520;
+  const LANE_X = 60;    // left edge of lane
+  const LANE_W = 120;   // lane width in SVG units (39 boards across)
+  const FL_Y   = 30;    // foul line y
+  const ARR_Y  = 165;   // arrows (15 ft mark) y
+  const DOT_Y  = 100;   // rangefinder dots (7 ft) y
+  const PIN_Y  = 440;   // pin deck y
+  const LANE_RIGHT = LANE_X + LANE_W;
 
-  // Convert board numbers to x positions (board 1 = right for RH, left for LH)
-  // We'll display RH convention: board 1 on right, board 39 on left
-  function boardX(b) {
+  // board → x: board 1 = right side (for RH), board 39 = left side
+  // For LH we mirror: board 1 = left side
+  function bx(b) {
     const clamped = Math.max(1, Math.min(39, b));
-    return PAD + (39 - clamped) * boardW + boardW / 2;
+    if (r.hand === 'right') {
+      return LANE_X + (39 - clamped) / 38 * LANE_W;
+    } else {
+      return LANE_X + (clamped - 1) / 38 * LANE_W;
+    }
   }
 
-  // Old line: stance at top (foul line), entry at bottom (pocket)
-  const oldStanceX = boardX(r.stance);
-  const oldEntryX  = boardX(r.entry);
-  // New line
-  const newStanceX = boardX(r.newStance);
-  const newEntryX  = boardX(17); // ideal pocket
+  // Key x positions
+  const oldStanceX  = bx(r.stance);
+  const oldTargetX  = bx(r.target);
+  const oldEntryX   = bx(r.entry);
+  const newStanceX  = bx(r.newStance);
+  const newTargetX  = bx(r.newTarget);
+  const pocketX     = bx(17);
 
-  // Target markers (arrows area = ~30% down)
-  const arrowY = H * 0.3;
-  const oldTargetX = boardX(r.target);
-  const newTargetX = boardX(r.newTarget);
+  // Arrow board marks (boards 5,10,15,20,25,30,35)
+  const arrowBoards = [5,10,15,20,25,30,35];
 
-  // Pin deck line at bottom
-  const pinY = H - 18;
-  const foulY = 18;
+  // Board lines at arrow positions
+  const boardLines = arrowBoards.map(b => {
+    const x = bx(b);
+    return `<line x1="${x}" y1="${FL_Y}" x2="${x}" y2="${PIN_Y}" stroke="#1a2a10" stroke-width="0.5" opacity="0.8"/>`;
+  }).join('');
+
+  // Arrow markers (chevron shapes at ARR_Y)
+  const arrowMarkers = arrowBoards.map(b => {
+    const x = bx(b);
+    return `<polygon points="${x},${ARR_Y - 6} ${x-4},${ARR_Y + 2} ${x+4},${ARR_Y + 2}" fill="#1e3a1e" stroke="#2a5a2a" stroke-width="0.5"/>`;
+  }).join('');
+
+  // Rangefinder dots at DOT_Y (boards 3,5,8,11,14 and mirrors)
+  const dotBoards = r.hand === 'right'
+    ? [3,5,8,11,14,26,29,32,35,37]
+    : [3,5,8,11,14,26,29,32,35,37];
+  const dotMarkers = dotBoards.map(b => {
+    const x = bx(b);
+    return `<circle cx="${x}" cy="${DOT_Y}" r="2" fill="#1e3a1e" stroke="#2a5a2a" stroke-width="0.5"/>`;
+  }).join('');
+
+  // Board number labels on left side at arrow positions
+  const boardLabels = arrowBoards.map(b => {
+    const x = bx(b);
+    const labelX = LANE_X - 6;
+    return `<text x="${labelX}" y="${ARR_Y + 1}" text-anchor="end" fill="#2a5a2a" font-size="8" font-family="monospace" dominant-baseline="middle"
+      transform="translate(0,0)" style="display:none"></text>`;
+  }).join('');
+
+  // Pocket marker line
+  const pocketLine = `<line x1="${pocketX}" y1="${ARR_Y}" x2="${pocketX}" y2="${PIN_Y}" stroke="#f5c84220" stroke-width="1" stroke-dasharray="2 4"/>`;
+
+  // Breakpoint marker — horizontal dashed line at the BP y position + circle on the old path
+  // BP is typically between arrows and pin deck — map it proportionally
+  // We'll place it between ARR_Y and PIN_Y based on board position (visual only — vertical position
+  // approximates ~40 ft out, which is ~60% of lane length from foul line)
+  const BP_Y = ARR_Y + (PIN_Y - ARR_Y) * 0.45;
+  const bpX  = bx(r.breakpt);
+  const bpLine = `
+    <line x1="${LANE_X}" y1="${BP_Y.toFixed(1)}" x2="${LANE_RIGHT}" y2="${BP_Y.toFixed(1)}"
+      stroke="#4ab8f025" stroke-width="0.8" stroke-dasharray="3 4"/>
+    <text x="${LANE_RIGHT + 6}" y="${BP_Y.toFixed(1)}" dominant-baseline="middle"
+      fill="#2a4a5a" font-size="7" font-family="monospace" text-anchor="start">BP</text>
+    <circle cx="${bpX.toFixed(1)}" cy="${BP_Y.toFixed(1)}" r="4"
+      fill="none" stroke="#4ab8f0" stroke-width="1.2" opacity="0.7"/>
+    <circle cx="${bpX.toFixed(1)}" cy="${BP_Y.toFixed(1)}" r="1.5"
+      fill="#4ab8f0" opacity="0.7"/>`;
+
+  // ── Pin layout (7-10 pin deck) ──
+  // Standard pin positions relative to center of pin deck
+  // Row 1 (front): pin 1 (headpin) — center
+  // Row 2: pins 2, 3
+  // Row 3: pins 4, 5, 6
+  // Row 4: pins 7, 8, 9, 10
+  // Each row is 18px apart vertically, pins in a row are 16px apart
+  const PIN_CX = LANE_X + LANE_W / 2;
+  const PR = 5; // pin circle radius
+  const ROW_GAP = 18;
+  const COL_GAP = 14;
+
+  function pinPos(row, col, totalInRow) {
+    const rowY = PIN_Y + row * ROW_GAP;
+    const startX = PIN_CX - ((totalInRow - 1) * COL_GAP) / 2;
+    return { x: startX + col * COL_GAP, y: rowY };
+  }
+
+  const pins = [
+    pinPos(0, 0, 1),  // 1 headpin
+    pinPos(1, 0, 2), pinPos(1, 1, 2),  // 2, 3
+    pinPos(2, 0, 3), pinPos(2, 1, 3), pinPos(2, 2, 3),  // 4, 5, 6
+    pinPos(3, 0, 4), pinPos(3, 1, 4), pinPos(3, 2, 4), pinPos(3, 3, 4),  // 7, 8, 9, 10
+  ];
+
+  const pinSVG = pins.map((p, i) => {
+    const isHeadpin = i === 0;
+    const isPocket = (r.hand === 'right') ? (i === 0 || i === 2) : (i === 0 || i === 1); // 1-3 pocket for RH
+    return `<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="${PR}"
+      fill="${isHeadpin ? '#2a3a2a' : '#1e2e1e'}"
+      stroke="${isPocket ? '#4a7a4a' : '#2a4a2a'}"
+      stroke-width="${isHeadpin ? '1' : '0.8'}"/>`;
+  }).join('');
+
+  // ── Ball path lines ──
+  // Old path: stance → target (at arrows) → entry (at pins)
+  // New path: newStance → newTarget → pocket
+  const oldPath = `
+    <line x1="${oldStanceX.toFixed(1)}" y1="${FL_Y}"
+          x2="${oldTargetX.toFixed(1)}" y2="${ARR_Y}"
+          stroke="#e05c2a" stroke-width="2" stroke-dasharray="5 3" opacity="0.75"/>
+    <line x1="${oldTargetX.toFixed(1)}" y1="${ARR_Y}"
+          x2="${bpX.toFixed(1)}"        y2="${BP_Y.toFixed(1)}"
+          stroke="#e05c2a" stroke-width="2" stroke-dasharray="5 3" opacity="0.75"/>
+    <line x1="${bpX.toFixed(1)}"        y1="${BP_Y.toFixed(1)}"
+          x2="${oldEntryX.toFixed(1)}"  y2="${PIN_Y}"
+          stroke="#e05c2a" stroke-width="2.5" stroke-dasharray="5 3" opacity="0.85"/>`;
+
+  const idealBPX = bx(r.hand === 'right' ? 10 : 10);
+  const newPath = `
+    <line x1="${newStanceX.toFixed(1)}" y1="${FL_Y}"
+          x2="${newTargetX.toFixed(1)}" y2="${ARR_Y}"
+          stroke="#4af04a" stroke-width="2" opacity="0.9"/>
+    <line x1="${newTargetX.toFixed(1)}" y1="${ARR_Y}"
+          x2="${idealBPX.toFixed(1)}"   y2="${BP_Y.toFixed(1)}"
+          stroke="#4af04a" stroke-width="2" opacity="0.9"/>
+    <line x1="${idealBPX.toFixed(1)}"   y1="${BP_Y.toFixed(1)}"
+          x2="${pocketX.toFixed(1)}"    y2="${PIN_Y}"
+          stroke="#4af04a" stroke-width="2.5" opacity="0.9"/>`;
+
+  // ── Stance dots at foul line ──
+  const stanceDots = `
+    <circle cx="${oldStanceX.toFixed(1)}" cy="${FL_Y}" r="4" fill="#e05c2a" opacity="0.8"/>
+    <circle cx="${newStanceX.toFixed(1)}" cy="${FL_Y}" r="4" fill="#4af04a" opacity="0.95"/>`;
+
+  // ── Target diamonds at arrows ──
+  function diamond(cx, cy, size, fill, opacity) {
+    return `<polygon points="${cx},${cy-size} ${cx+size},${cy} ${cx},${cy+size} ${cx-size},${cy}"
+      fill="${fill}" opacity="${opacity}"/>`;
+  }
+  const targetMarkers = diamond(oldTargetX, ARR_Y, 5, '#e05c2a', '0.8') +
+                        diamond(newTargetX, ARR_Y, 5, '#4af04a', '0.95');
+
+  // ── Entry dots at pin deck ──
+  const entryDots = `
+    <circle cx="${oldEntryX.toFixed(1)}" cy="${PIN_Y}" r="4" fill="#e05c2a" opacity="0.85"/>
+    <circle cx="${pocketX.toFixed(1)}"   cy="${PIN_Y}" r="4" fill="#4af04a" opacity="0.95"/>`;
+
+  // ── Board labels along left edge of lane at arrow level ──
+  const sideLabelY = ARR_Y;
+  const arrowBoardLabels = arrowBoards.map(b => {
+    const x = bx(b);
+    return `<text x="${x}" y="${ARR_Y + 14}" text-anchor="middle"
+      fill="#2a5a2a" font-size="7" font-family="monospace">${b}</text>`;
+  }).join('');
+
+  // ── Zone labels (right side of lane) ──
+  const zoneLabels = `
+    <text x="${LANE_RIGHT + 6}" y="${FL_Y + 1}" dominant-baseline="middle"
+      fill="#3a3a6a" font-size="8" font-family="monospace" text-anchor="start">FL</text>
+    <text x="${LANE_RIGHT + 6}" y="${DOT_Y}" dominant-baseline="middle"
+      fill="#2a4a2a" font-size="7" font-family="monospace" text-anchor="start">dots</text>
+    <text x="${LANE_RIGHT + 6}" y="${ARR_Y}" dominant-baseline="middle"
+      fill="#2a5a2a" font-size="8" font-family="monospace" text-anchor="start">arrows</text>
+    <text x="${LANE_RIGHT + 6}" y="${PIN_Y}" dominant-baseline="middle"
+      fill="#2a5a2a" font-size="8" font-family="monospace" text-anchor="start">pins</text>`;
+
+  // ── Board callouts (entry board numbers below entry dots) ──
+  const entryCalls = `
+    <text x="${oldEntryX.toFixed(1)}" y="${PIN_Y - 10}" text-anchor="middle"
+      fill="#e05c2a" font-size="8" font-family="monospace">${r.entry}</text>
+    <text x="${pocketX.toFixed(1)}" y="${PIN_Y - 10}" text-anchor="middle"
+      fill="#4af04a" font-size="8" font-family="monospace">17</text>`;
+
+  // ── Stance board callouts at foul line ──
+  const stanceCalls = `
+    <text x="${oldStanceX.toFixed(1)}" y="${FL_Y - 8}" text-anchor="middle"
+      fill="#e05c2a" font-size="8" font-family="monospace">${r.stance}</text>
+    <text x="${newStanceX.toFixed(1)}" y="${FL_Y - 8}" text-anchor="middle"
+      fill="#4af04a" font-size="8" font-family="monospace">${r.newStance}</text>`;
+
+  // ── Legend ──
+  const LX = 8, LY = FL_Y;
+  const legend = `
+    <line x1="${LX}" y1="${LY}" x2="${LX+18}" y2="${LY}" stroke="#e05c2a" stroke-width="2" stroke-dasharray="4 2" opacity="0.8"/>
+    <text x="${LX}" y="${LY + 12}" fill="#e05c2a" font-size="7" font-family="monospace">current</text>
+    <line x1="${LX}" y1="${LY + 24}" x2="${LX+18}" y2="${LY + 24}" stroke="#4af04a" stroke-width="2" opacity="0.9"/>
+    <text x="${LX}" y="${LY + 36}" fill="#4af04a" font-size="7" font-family="monospace">adjusted</text>`;
 
   return `
     <div class="lane-viz">
-      <div class="lane-viz-label">Line visualization · top-down view</div>
-      <div class="lane-svg-wrap">
-        <svg width="100%" viewBox="0 0 ${W} ${H}" style="display:block;">
-          <!-- Lane background -->
-          <rect x="${PAD}" y="${foulY}" width="${laneW}" height="${pinY - foulY}" fill="#0d1208" rx="2"/>
-          <!-- Board lines every 5 boards -->
-          ${[5,10,15,20,25,30,35].map(b => {
-            const x = PAD + (39 - b) * boardW + boardW / 2;
-            return `<line x1="${x}" y1="${foulY}" x2="${x}" y2="${pinY}" stroke="#1a2a10" stroke-width="0.5"/>
-                    <text x="${x}" y="${foulY - 4}" text-anchor="middle" fill="#2a4a20" font-size="7" font-family="monospace">${b}</text>`;
-          }).join('')}
-          <!-- Arrows area line -->
-          <line x1="${PAD}" y1="${arrowY}" x2="${PAD + laneW}" y2="${arrowY}" stroke="#2a3a20" stroke-width="0.5" stroke-dasharray="3 3"/>
-          <text x="${PAD - 4}" y="${arrowY + 3}" text-anchor="end" fill="#2a4a20" font-size="7" font-family="monospace">▼</text>
+      <div class="lane-viz-label">🎳 lane view · foul line → pins</div>
+      <div class="lane-svg-wrap" style="display:flex;justify-content:center;">
+        <svg width="220" viewBox="0 0 ${SVG_W} ${SVG_H}" style="display:block;">
 
-          <!-- Foul line label -->
-          <text x="${PAD - 4}" y="${foulY + 4}" text-anchor="end" fill="#3a3a6a" font-size="7" font-family="monospace">FL</text>
-          <!-- Pin line label -->
-          <text x="${PAD - 4}" y="${pinY + 4}" text-anchor="end" fill="#3a3a6a" font-size="7" font-family="monospace">↓</text>
+          <!-- Lane surface -->
+          <rect x="${LANE_X}" y="${FL_Y}" width="${LANE_W}" height="${PIN_Y - FL_Y + 80}"
+            fill="#0a120a" rx="2"/>
 
-          <!-- Old line (orange/miss) -->
-          <line x1="${oldStanceX}" y1="${foulY}" x2="${oldTargetX}" y2="${arrowY}"
-            stroke="#e05c2a" stroke-width="1.5" stroke-dasharray="4 3" opacity="0.7"/>
-          <line x1="${oldTargetX}" y1="${arrowY}" x2="${oldEntryX}" y2="${pinY}"
-            stroke="#e05c2a" stroke-width="1.5" stroke-dasharray="4 3" opacity="0.7"/>
-          <circle cx="${oldEntryX}" cy="${pinY}" r="3" fill="#e05c2a" opacity="0.8"/>
-          <text x="${oldEntryX}" y="${pinY + 11}" text-anchor="middle" fill="#e05c2a" font-size="7" font-family="monospace">${r.entry}</text>
+          <!-- Gutter strips -->
+          <rect x="${LANE_X - 8}" y="${FL_Y}" width="8" height="${PIN_Y - FL_Y + 80}" fill="#080f08" rx="1"/>
+          <rect x="${LANE_RIGHT}"  y="${FL_Y}" width="8" height="${PIN_Y - FL_Y + 80}" fill="#080f08" rx="1"/>
 
-          <!-- New line (green/target) -->
-          <line x1="${newStanceX}" y1="${foulY}" x2="${newTargetX}" y2="${arrowY}"
-            stroke="#4af04a" stroke-width="1.5" opacity="0.9"/>
-          <line x1="${newTargetX}" y1="${arrowY}" x2="${newEntryX}" y2="${pinY}"
-            stroke="#4af04a" stroke-width="1.5" opacity="0.9"/>
-          <circle cx="${newEntryX}" cy="${pinY}" r="3" fill="#4af04a" opacity="0.9"/>
-          <text x="${newEntryX}" y="${pinY + 11}" text-anchor="middle" fill="#4af04a" font-size="7" font-family="monospace">17</text>
+          <!-- Board lines at arrow positions -->
+          ${boardLines}
 
-          <!-- Stance markers at foul line -->
-          <circle cx="${oldStanceX}" cy="${foulY}" r="3" fill="#e05c2a" opacity="0.7"/>
-          <circle cx="${newStanceX}" cy="${foulY}" r="3" fill="#4af04a" opacity="0.9"/>
+          <!-- Pocket line (subtle) -->
+          ${pocketLine}
 
-          <!-- Target markers at arrows -->
-          <rect x="${oldTargetX - 3}" y="${arrowY - 4}" width="6" height="8" rx="1" fill="#e05c2a" opacity="0.6"/>
-          <rect x="${newTargetX - 3}" y="${arrowY - 4}" width="6" height="8" rx="1" fill="#4af04a" opacity="0.8"/>
+          <!-- Breakpoint marker -->
+          ${bpLine}
 
-          <!-- Pin deck -->
-          <line x1="${PAD}" y1="${pinY}" x2="${PAD + laneW}" y2="${pinY}" stroke="#2a4a2a" stroke-width="0.5"/>
+          <!-- Rangefinder dots -->
+          ${dotMarkers}
+
+          <!-- Foul line -->
+          <line x1="${LANE_X - 8}" y1="${FL_Y}" x2="${LANE_RIGHT + 8}" y2="${FL_Y}"
+            stroke="#3a3a7a" stroke-width="1.5"/>
+
+          <!-- Arrow markers -->
+          ${arrowMarkers}
+
+          <!-- Arrow board number labels -->
+          ${arrowBoardLabels}
+
+          <!-- Ball paths -->
+          ${oldPath}
+          ${newPath}
+
+          <!-- Stance dots -->
+          ${stanceDots}
+
+          <!-- Target diamonds -->
+          ${targetMarkers}
+
+          <!-- Entry dots -->
+          ${entryDots}
+
+          <!-- Pin layout -->
+          ${pinSVG}
+
+          <!-- Board callouts -->
+          ${stanceCalls}
+          ${entryCalls}
+
+          <!-- Zone labels -->
+          ${zoneLabels}
 
           <!-- Legend -->
-          <line x1="${W - 80}" y1="10" x2="${W - 65}" y2="10" stroke="#e05c2a" stroke-width="1.5" stroke-dasharray="4 3" opacity="0.7"/>
-          <text x="${W - 62}" y="13" fill="#e05c2a" font-size="7" font-family="monospace">current</text>
-          <line x1="${W - 80}" y1="22" x2="${W - 65}" y2="22" stroke="#4af04a" stroke-width="1.5" opacity="0.9"/>
-          <text x="${W - 62}" y="25" fill="#4af04a" font-size="7" font-family="monospace">adjusted</text>
+          ${legend}
+
         </svg>
       </div>
     </div>
@@ -1372,7 +1593,7 @@ function adjSlider(key, val) {
 }
 function updateCalcBtn() {
   const a = state.adj;
-  const can = a.stanceTouched && a.targetTouched && a.entryTouched && a.speedTouched && a.reaction && a.miss;
+  const can = a.stanceTouched && a.targetTouched && a.breakpointTouched && a.entryTouched && a.speedTouched && a.reaction && a.miss;
   const btn = document.getElementById('calc-btn');
   if (btn) {
     btn.style.opacity = can ? '1' : '0.4';
@@ -1405,8 +1626,8 @@ function runAdjustment() {
   }, 100);
 }
 function resetAdj() {
-  state.adj = { hand: state.adj.hand, stance:'', target:'', entry:'', speed:'',
-    stanceTouched:false, targetTouched:false, entryTouched:false, speedTouched:false,
+  state.adj = { hand: state.adj.hand, stance:'', target:'', breakpoint:'', entry:'', speed:'',
+    stanceTouched:false, targetTouched:false, breakpointTouched:false, entryTouched:false, speedTouched:false,
     reaction:'', miss:'', result:null };
   render();
 }
